@@ -50,7 +50,11 @@ public class MaltsBaseCommand implements TabExecutor {
         List<String> commandArgs = new ArrayList<>(List.of(args));
         commandArgs.removeFirst(); // Remove the subcommand name
 
-        return subCommand.execute(Malts.getInstance(), sender, label, commandArgs);
+        boolean result = subCommand.execute(Malts.getInstance(), sender, label, commandArgs);
+        if (!result) {
+            lang.entry(l -> l.command().base().invalidUsage(), sender);
+        }
+        return result;
     }
 
     @Override

@@ -70,6 +70,8 @@ public class Lang extends OkaeriFile {
         private String noVaultFound;
         private String vaultDeleted;
         private String vaultNameTooLong;
+        private String transferred;
+        private String cannotTransfer;
     }
 
     @Getter
@@ -100,6 +102,7 @@ public class Lang extends OkaeriFile {
             private String unknownCommand;
             private String playerOnly;
             private String noPermission;
+            private String invalidUsage;
         }
         @Getter
         @Accessors(fluent = true)
@@ -157,7 +160,9 @@ public class Lang extends OkaeriFile {
     @Nullable
     public final Component entry(FunctionalLang functionalLang, boolean prefix, Couple<String, Object>... placeholders) {
         String entry = functionalLang.get(this);
-        if (entry == null || entry.isEmpty()) {
+        if (entry == null) {
+            entry = "<red>Lang entry was not found.";
+        } else if (entry.isEmpty()) {
             return null;
         }
 

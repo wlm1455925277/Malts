@@ -28,11 +28,13 @@ vaults:
   playerTrusted: '{name} has been added to your trust list.'
   playerUntrusted: '{name} has been removed from your trust list.'
   playerNotTrusted: '{name} is not on your trust list.'
-  noVaultsFound: There are no vaults for {name}.
+  noVaultsFound: Couldn't find that vault!
   noVaultsAccessible: You do not have access to any vaults for {name}. Have they trusted you to any of them?
   noVaultFound: '<aqua><b>Vault #{id}</b></aqua> does not exist.'
   vaultDeleted: '<aqua><b>Vault #{id}</b></aqua> has been deleted.'
   vaultNameTooLong: Vault names cannot be longer than {maxLength} characters.
+  transferred: Transferred {amount}x vaults from {name} to {otherName} and {otherAmount}x vaults from {otherName} to {name}.
+  cannotTransfer: Cannot transfer vaults between the same player.
 
 gui:
   firstPage: You are on the first page.
@@ -63,10 +65,13 @@ command:
     <green>/malts vaults <index?> - <gray>Open a vault(s) you own.
     <green>/malts warehouseadmin <name> - <gray>Manage the warehouse of another player.
     <green>/malts warehouse - <gray>Open your warehouse.
+    <green>/malts quickreturn <left|middle|right|none> - <gray>Set your quick return click preference.
+    <green>/malts vaultname <name> - <gray>Open a vault by its name.
   base:
     unknownCommand: Unknown command. Type <aqua>/malts help</aqua> for a list of commands.
     playerOnly: This command can only be executed by a player.
     noPermission: You do not have permission to execute this command.
+    invalidUsage: Invalid command usage. Did you provide valid arguments?
   max:
     invalidType: Invalid type, must be either 'vaults' or 'stock'.
     success: 'Set max {type} for {name} to {newMax} <gray>(Implicitly: {calculatedMax})</gray>'

@@ -1,6 +1,8 @@
 package dev.jsinco.malts;
 
 import dev.jsinco.malts.commands.MaltsBaseCommand;
+import dev.jsinco.malts.commands.VaultNameBaseCommand;
+import dev.jsinco.malts.commands.VaultOtherBaseCommand;
 import dev.jsinco.malts.commands.VaultsBaseCommand;
 import dev.jsinco.malts.commands.WarehouseBaseCommand;
 import dev.jsinco.malts.events.ChatPromptInputListener;
@@ -35,6 +37,8 @@ public final class Malts extends JavaPlugin {
         getServer().getPluginCommand("malts").setExecutor(new MaltsBaseCommand());
         getServer().getPluginCommand("vaults").setExecutor(new VaultsBaseCommand());
         getServer().getPluginCommand("warehouse").setExecutor(new WarehouseBaseCommand());
+        getServer().getPluginCommand("vaultother").setExecutor(new VaultOtherBaseCommand());
+        getServer().getPluginCommand("vaultname").setExecutor(new VaultNameBaseCommand());
 
         getServer().getPluginManager().registerEvents(new PlayerListener(), this);
         getServer().getPluginManager().registerEvents(new VaultListener(), this);

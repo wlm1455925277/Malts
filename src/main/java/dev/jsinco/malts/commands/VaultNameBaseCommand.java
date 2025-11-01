@@ -1,0 +1,10 @@
+package dev.jsinco.malts.commands;
+
+import dev.jsinco.malts.commands.interfaces.SubCommandWrapper;
+import dev.jsinco.malts.commands.subcommands.VaultNameCommand;
+
+public class VaultNameBaseCommand extends SubCommandWrapper {
+    public VaultNameBaseCommand() {
+        super(new VaultNameCommand());
+    }
+}

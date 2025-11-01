@@ -13,4 +13,12 @@ public final class ClassUtil {
         }
     }
 
+    public static Class<?> getClassIfExists(String className) {
+        try {
+            return Class.forName(className);
+        } catch (ClassNotFoundException e) {
+            return null;
+        }
+    }
+
 }

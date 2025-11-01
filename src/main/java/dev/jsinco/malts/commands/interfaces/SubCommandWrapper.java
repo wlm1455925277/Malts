@@ -30,7 +30,12 @@ public abstract class SubCommandWrapper implements TabExecutor {
             lang.entry(l -> l.command().base().playerOnly(), sender);
             return true;
         }
-        return subCommand.execute(Malts.getInstance(), sender, label, List.of(args));
+
+        boolean result = subCommand.execute(Malts.getInstance(), sender, label, List.of(args));
+        if (!result) {
+            lang.entry(l -> l.command().base().invalidUsage(), sender);
+        }
+        return result;
     }
 
     @Override

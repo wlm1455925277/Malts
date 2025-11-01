@@ -15,6 +15,12 @@ commands:
   warehouse:
     description: Alias for /malts warehouse
     aliases: [es, wh]
+  vaultother:
+    description: Alias for /malts vaultother <name> <index?>
+    aliases: [pvo, vaultsother, chestother]
+  vaultname:
+    description: Alias for /malts vaultbyname <name>
+    aliases: [pvn, chestname]
 permissions:
   malts.*:
     description: A permission node for Malts intended for admins.
@@ -45,6 +51,7 @@ permissions:
       malts.command.vaultother: true
       malts.command.warehouse: true
       malts.command.quickreturn: true
+      malts.command.vaultname: true
   malts.command.*:
     children:
       malts.command.base: true
@@ -58,6 +65,7 @@ permissions:
       malts.command.warehouseadmin: true
       malts.command.warehouse: true
       malts.command.quickreturn: true
+      malts.command.vaultname: true
   malts.bypass.*:
     children:
       malts.bypass.openvault: true

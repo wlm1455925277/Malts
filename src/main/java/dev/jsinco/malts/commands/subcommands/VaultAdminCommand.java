@@ -3,7 +3,6 @@ package dev.jsinco.malts.commands.subcommands;
 import dev.jsinco.malts.Malts;
 import dev.jsinco.malts.commands.interfaces.SubCommand;
 import dev.jsinco.malts.obj.MaltsPlayer;
-import dev.jsinco.malts.obj.SnapshotVault;
 import dev.jsinco.malts.obj.Vault;
 import dev.jsinco.malts.registry.Registry;
 import dev.jsinco.malts.storage.DataSource;
@@ -14,7 +13,6 @@ import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
 import java.util.List;
@@ -107,6 +105,10 @@ public class VaultAdminCommand implements SubCommand {
         TRANSFER((plugin, sender, label, args, offlinePlayer) -> {
             DataSource dataSource = DataSource.getInstance();
             OfflinePlayer otherPlayer = Bukkit.getOfflinePlayer(args.getFirst());
+            if (offlinePlayer.getUniqueId().equals(otherPlayer.getUniqueId())) {
+                lng.entry(l -> lng.vaults().cannotTransfer(), sender);
+                return true;
+            }
 
             Executors.runAsync(task -> {
                 List<Vault> player1Vaults = dataSource.getVaults(offlinePlayer.getUniqueId()).join().stream().map(it -> it.toVault().join()).toList();
@@ -120,8 +122,14 @@ public class VaultAdminCommand implements SubCommand {
                 for (Vault vault : player2Vaults) {
                     dataSource.saveVault(vault.copy(offlinePlayer.getUniqueId())).join();
                 }
-                // TODO: Lang message
-                sender.sendMessage("Transferred " + player1Vaults.size() + " vaults from " + offlinePlayer.getName() + " to " + otherPlayer.getName() + " and " + player2Vaults.size() + " vaults from " + otherPlayer.getName() + " to " + offlinePlayer.getName() + ".");
+                lng.entry(
+                        l -> l.vaults().transferred(),
+                        sender,
+                        Couple.of("{amount}", player1Vaults.size()),
+                        Couple.of("{name}", offlinePlayer.getName()),
+                        Couple.of("{otherAmount}", player2Vaults.size()),
+                        Couple.of("{otherName}", otherPlayer.getName())
+                );
             });
             return true;
         }, (plugin, sender, label, args, offlinePlayer) -> {

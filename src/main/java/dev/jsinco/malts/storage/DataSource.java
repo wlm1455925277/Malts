@@ -43,11 +43,14 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 public abstract class DataSource {
 
     public static final Path DATA_FOLDER = Malts.getInstance().getDataPath();
+    private static final int SAVE_INTERVAL_SECONDS = 60;
+    private static final int TASK_INTERVAL_SECONDS = 2;
 
     protected final ExecutorService singleThread = Executors.newSingleThreadExecutor();
 
@@ -63,12 +66,14 @@ public abstract class DataSource {
     public abstract CompletableFuture<Void> createTables();
 
     public abstract CompletableFuture<@Nullable Vault> getVault(UUID owner, int id, boolean createIfNull);
+    public abstract CompletableFuture<@Nullable Vault> getVault(UUID owner, String customName);
 
     public abstract CompletableFuture<@NotNull Collection<SnapshotVault>> getVaults(UUID owner);
     public abstract CompletableFuture<Void> saveVault(Vault vault);
     public abstract CompletableFuture<@NotNull Boolean> deleteVault(UUID owner, int id);
     public abstract CompletableFuture<@NotNull Integer> deleteVaults(UUID owner);
     public abstract CompletableFuture<@NotNull Collection<Vault>> getAllVaults(); // Used for exporting vaults. (Mainly to other plugins)
+    public abstract CompletableFuture<List<String>> getVaultNames(UUID owner);
 
 
     public abstract CompletableFuture<@NotNull Warehouse> getWarehouse(UUID owner);
@@ -96,24 +101,27 @@ public abstract class DataSource {
         UUID owner = player.getUniqueId();
 
         getVault(owner, id, false).thenAccept(vault -> {
-            if (vault == null) {
+            if (vault == null) { // Check if vault exists
+                // Check if we're using economy and if there's a creation fee
                 if (econ != null && !econ.withdrawOrBypass(player, creationFee)) {
                     lang.entry(l -> l.economy().vaults().cannotAffordCreation(), player, Couple.of("{cost}", String.format("%,.2f", creationFee)));
-                    return;
+                    return; // Cannot afford creation
                 }
+
+                // Create the vault since it doesn't exist
                 vault = new Vault(owner, id);
-                if (econ != null) {
+                if (econ != null) { // Charge creation fee
                     lang.entry(l -> l.economy().vaults().created(), player, Couple.of("{cost}", String.format("%,.2f", creationFee)));
                 }
-            } else if (econ != null) {
+            } else if (econ != null) { // Existing vault, charge access fee
                 if (!econ.withdrawOrBypass(player, accessFee)) {
                     lang.entry(l -> l.economy().vaults().cannotAffordAccess(), player, Couple.of("{cost}", String.format("%,.2f", accessFee)));
-                    return;
+                    return; // Cannot afford access fee
                 }
                 lang.entry(l -> l.economy().vaults().accessed(), player, Couple.of("{cost}", String.format("%,.2f", accessFee)));
             }
 
-            consumer.accept(vault);
+            consumer.accept(vault); // Done, provide the vault
         });
     }
 
@@ -128,17 +136,27 @@ public abstract class DataSource {
     }
 
     public CompletableFuture<Void> setup() {
-        return this.createTables().thenRun(() -> this.cacheTask = Executors.runRepeatingAsync(1, TimeUnit.MINUTES, task -> {
-            Text.debug("Cached Objects: " + cachedObjects.size());
+        AtomicInteger count = new AtomicInteger(0);
+        return this.createTables().thenRun(() -> this.cacheTask = Executors.runRepeatingAsync(TASK_INTERVAL_SECONDS, TimeUnit.SECONDS, task -> {
+            int intervalCount = count.getAndAdd(TASK_INTERVAL_SECONDS);
+
             for (CachedObject cachedObject : cachedObjects) {
-                cachedObject.save(this);
-                Text.debug("Saved CachedObject " + cachedObject.getClass().getSimpleName() + ": " + cachedObject.getUuid());
+                if (intervalCount >= SAVE_INTERVAL_SECONDS) {
+                    Text.debug("Cached Objects size: " + cachedObjects.size());
+                    Text.debug("Saved CachedObject " + cachedObject.getClass().getSimpleName() + ": " + cachedObject.getUuid());
+                    cachedObject.save(this);
+                }
 
                 if (cachedObject.isExpired()) {
+                    cachedObject.save(this);
                     cachedObjects.remove(cachedObject);
                     //new CachedObjectEvent(this, cachedObject, EventAction.REMOVE).callEvent();
                     Text.debug("Uncached " + cachedObject.getClass().getSimpleName() + ": " + cachedObject.getUuid() + " because it was expired");
                 }
+            }
+
+            if (intervalCount >= SAVE_INTERVAL_SECONDS) {
+                count.set(0);
             }
         }));
     }
@@ -210,6 +228,21 @@ public abstract class DataSource {
             );
         }
         return create ? new Vault(owner, id) : null;
+    }
+
+    @Nullable
+    public Vault mapVault(ResultSet rs, UUID owner) throws SQLException {
+        if (rs.next()) {
+            return new Vault(
+                    owner,
+                    rs.getInt("id"),
+                    rs.getString("inventory"),
+                    rs.getString("custom_name"),
+                    Material.getMaterial(rs.getString("icon")),
+                    rs.getString("trusted_players")
+            );
+        }
+        return null;
     }
 
     public List<Vault> mapVaults(ResultSet rs) throws SQLException {
@@ -294,7 +327,7 @@ public abstract class DataSource {
     }
 
     public <T extends CachedObject> CompletableFuture<T> cacheObject(CompletableFuture<T> future, long expire) {
-        return cacheObjectInternal(future, System.currentTimeMillis() + expire);
+        return cacheObjectInternal(future, expire);
     }
 
     public <T extends CachedObject> CompletableFuture<T> cacheObject(CompletableFuture<T> future) {
@@ -315,7 +348,11 @@ public abstract class DataSource {
 
                         @SuppressWarnings("unchecked")
                         T alreadyCached = (T) cached;
-                        alreadyCached.setExpire(expireTime);
+                        if (expireTime != null) {
+                            long expireWhen = System.currentTimeMillis() + expireTime;
+                            alreadyCached.setExpire(expireWhen); // Update expire time
+                            Text.debug("Updated expire time for cached " + obj.getClass().getSimpleName() + ": " + obj.getUuid() + " to " + expireWhen);
+                        }
                         Text.debug("Using cached " + obj.getClass().getSimpleName() + ": " + obj.getUuid());
                         return CompletableFuture.completedFuture(alreadyCached);
                     }
@@ -323,7 +360,10 @@ public abstract class DataSource {
             }
 
             // Not found, cache the new object
-            obj.setExpire(expireTime);
+            if (expireTime != null) {
+                long expireWhen = System.currentTimeMillis() + expireTime;
+                obj.setExpire(expireWhen);
+            }
             synchronized (cachedObjects) {
                 cachedObjects.add(obj);
                 //new CachedObjectEvent(this, obj, EventAction.ADD).callEvent();

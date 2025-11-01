@@ -12,12 +12,15 @@ import dev.jsinco.malts.utility.Executors;
 import dev.jsinco.malts.utility.Text;
 import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -64,6 +67,22 @@ public class MySQLDataSource extends DataSource {
                 statement.setInt(2, id);
                 ResultSet resultSet = statement.executeQuery();
                 return this.mapVault(resultSet, owner, id, createIfNull);
+            }
+        });
+    }
+
+    @Override
+    public CompletableFuture<@Nullable Vault> getVault(UUID owner, String customName) {
+        return Executors.supplyAsyncWithSQLException(() -> {
+            try (Connection connection = this.connection()) {
+                PreparedStatement statement = connection.prepareStatement(
+                        this.getStatement("vaults/select_vault_by_name.sql")
+                );
+                statement.setString(1, owner.toString());
+                statement.setString(2, customName);
+                ResultSet resultSet = statement.executeQuery();
+
+                return this.mapVault(resultSet, owner);
             }
         });
     }
@@ -145,6 +164,27 @@ public class MySQLDataSource extends DataSource {
 
                 ResultSet resultSet = statement.executeQuery();
                 return this.mapVaults(resultSet);
+            }
+        });
+    }
+
+    @Override
+    public CompletableFuture<List<String>> getVaultNames(UUID owner) {
+        return Executors.supplyAsyncWithSQLException(() -> {
+            try (Connection connection = this.connection()) {
+                PreparedStatement statement = connection.prepareStatement(
+                        this.getStatement("vaults/select_vault_names.sql")
+                );
+
+                statement.setString(1, owner.toString());
+
+                ResultSet resultSet = statement.executeQuery();
+                List<String> vaultNames = new ArrayList<>();
+                while (resultSet.next()) {
+                    String name = resultSet.getString("normalized_name");
+                    vaultNames.add(name);
+                }
+                return vaultNames;
             }
         });
     }
