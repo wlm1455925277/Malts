@@ -21,11 +21,13 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -146,6 +148,10 @@ public class Warehouse implements CachedObject {
         return Map.copyOf(warehouseMap);
     }
 
+    public Collection<Material> storedMaterials() {
+        return warehouseMap.keySet();
+    }
+
     public int currentStockQuantity() {
         return warehouseMap.values().stream().mapToInt(Stock::getAmount).sum();
     }
@@ -190,6 +196,80 @@ public class Warehouse implements CachedObject {
     @Override
     public boolean isExpired() {
         return CachedObject.super.isExpired() && Bukkit.getPlayer(owner) == null;
+    }
+
+
+    /**
+     * Stocks items from a player's inventory into the warehouse.
+     * If the player has enough of the specified material in their inventory,
+     * the method will transfer the specified amount (or as much as possible)
+     * to the warehouse and remove it from the player's inventory.
+     * @param player the player doing the action
+     * @param inv the inventory to stock from
+     * @param material the material to stock
+     * @param amt the amount to stock
+     * @return true if items were successfully stocked, false otherwise
+     */
+    public boolean stockWithInventory(Player player, Inventory inv, Material material, int amt) {
+        int materialInInv = Util.getMaterialAmount(inv, material);
+        if (materialInInv == 0 || amt < 0) {
+            lng.entry(l -> l.warehouse().notEnoughMaterial(), player,
+                    Couple.of("{material}", Util.formatEnumerator(material.toString()))
+            );
+            return false;
+        }
+
+        int toStock = Math.min(amt, materialInInv);
+        int stockedAmt = stockItem(material, toStock);
+        if (stockedAmt > 0) {
+            inv.removeItem(new ItemStack(material, stockedAmt));
+            lng.entry(l -> l.warehouse().addedItem(), player,
+                    Couple.of("{amount}", String.valueOf(stockedAmt)),
+                    Couple.of("{material}", Util.formatEnumerator(material)),
+                    Couple.of("{stock}", String.valueOf(this.getQuantity(material)))
+            );
+            return true;
+        } else {
+            lng.entry(l -> l.warehouse().notEnoughStock(), player);
+            return false;
+        }
+    }
+
+    /**
+     * Destocks items from the warehouse to a player's inventory.
+     * The method checks how much of the specified material the player's inventory can hold
+     * and destocks that amount (or as much as requested) from the warehouse to the player's inventory.
+     * @param player the player doing the action
+     * @param inv the inventory to destock to
+     * @param material the material to destock
+     * @param amt the amount to destock
+     * @return the ItemStack destocked to the inventory, or null if destocking was not possible
+     */
+    @Nullable
+    public ItemStack destockToInventory(Player player, Inventory inv, Material material, int amt) {
+        int invAmt = Util.getAmountInvCanHold(inv, material);
+        int toDestock = Math.min(amt, invAmt);
+        if (invAmt == 0 || toDestock <= 0) {
+            lng.entry(l -> l.warehouse().inventoryFull(), player);
+            return null;
+        }
+
+
+        ItemStack itemStack = destockItem(material, toDestock);
+        if (itemStack != null) {
+            inv.addItem(itemStack);
+            lng.entry(l -> l.warehouse().withdrewItem(), player,
+                    Couple.of("{amount}", String.valueOf(itemStack.getAmount())),
+                    Couple.of("{material}", Util.formatEnumerator(material)),
+                    Couple.of("{stock}", String.valueOf(this.getQuantity(material)))
+            );
+            return itemStack;
+        } else {
+            lng.entry(l -> l.warehouse().notEnoughMaterial(), player,
+                    Couple.of("{material}", Util.formatEnumerator(material.toString()))
+            );
+            return null;
+        }
     }
 
     public List<GuiItem> stockAsGuiItems(int truncate) {

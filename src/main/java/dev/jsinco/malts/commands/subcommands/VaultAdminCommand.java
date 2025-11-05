@@ -13,6 +13,7 @@ import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
 import java.util.List;
@@ -151,6 +152,7 @@ public class VaultAdminCommand implements SubCommand {
         private interface Handler {
             boolean handle(Malts plugin, CommandSender sender, String label, List<String> args, OfflinePlayer offlinePlayer);
         }
+
         private interface TabCompleter {
             List<String> handle(Malts plugin, CommandSender sender, String label, List<String> args, OfflinePlayer offlinePlayer);
         }

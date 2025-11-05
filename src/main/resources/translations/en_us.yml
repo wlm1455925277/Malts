@@ -16,6 +16,8 @@ warehouse:
   depositedItem: '<yellow>Deposited <aqua><b>{amount}x {material}</b></aqua> into container. <gray>(Stock: {stock})</gray>'
   cannotDepositItem: You cannot deposit items into this container.
   blacklistedItem: You cannot deposit <aqua><b>{material}</b></aqua> into your warehouse.
+  addedItem: 'Stored <aqua><b>{amount}x {material}</b></aqua> into your warehouse. <gray>(Stock: {stock})</gray>'
+  withdrewItem: 'Withdrew <aqua><b>{amount}x {material}</b></aqua> from your warehouse. <gray>(Stock: {stock})</gray>'
 
 
 vaults:

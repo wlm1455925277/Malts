@@ -35,7 +35,7 @@ public class ConfigManager implements RegistryCrafter.Extension<OkaeriConfig>{
 
         return eu.okaeri.configs.ConfigManager.create((Class<T>) clazz, (it) -> {
             it.withConfigurer(new YamlBukkitConfigurer(), new StandardSerdes());
-            it.withRemoveOrphans(true);
+            it.withRemoveOrphans(false);
             it.withBindFile(DATA_FOLDER.resolve(fileName));
             it.withSerdesPack(serdes -> {
                 serdes.register(new IntPairTransformer());

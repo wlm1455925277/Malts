@@ -6,7 +6,6 @@ import dev.jsinco.malts.gui.VaultOtherGui;
 import dev.jsinco.malts.obj.MaltsPlayer;
 import dev.jsinco.malts.storage.DataSource;
 import dev.jsinco.malts.utility.Couple;
-import dev.jsinco.malts.utility.Executors;
 import dev.jsinco.malts.utility.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
