@@ -208,15 +208,15 @@ public class Warehouse implements CachedObject {
      * @param inv the inventory to stock from
      * @param material the material to stock
      * @param amt the amount to stock
-     * @return true if items were successfully stocked, false otherwise
+     * @return the amount actually stocked
      */
-    public boolean stockWithInventory(Player player, Inventory inv, Material material, int amt) {
+    public int stockWithInventory(Player player, Inventory inv, Material material, int amt) {
         int materialInInv = Util.getMaterialAmount(inv, material);
         if (materialInInv == 0 || amt < 0) {
             lng.entry(l -> l.warehouse().notEnoughMaterial(), player,
                     Couple.of("{material}", Util.formatEnumerator(material.toString()))
             );
-            return false;
+            return 0;
         }
 
         int toStock = Math.min(amt, materialInInv);
@@ -228,10 +228,10 @@ public class Warehouse implements CachedObject {
                     Couple.of("{material}", Util.formatEnumerator(material)),
                     Couple.of("{stock}", String.valueOf(this.getQuantity(material)))
             );
-            return true;
+            return stockedAmt;
         } else {
             lng.entry(l -> l.warehouse().notEnoughStock(), player);
-            return false;
+            return 0;
         }
     }
 
