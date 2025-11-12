@@ -91,3 +91,15 @@ command:
   quickReturn:
     success: Your quick return click preference has been set.
     failed: You either provided no arguments or did not provide a valid option.
+  search:
+    playerNotFound: This player does not exist or you do not have permission to search their vaults.
+    noAccessibleVaults: You do not have access to any vaults for {name}. Have they trusted you to any of them?
+    noResults: Couldn't find any items matching '<aqua><b>{query}</b></aqua>'. Try searching by <yellow>name, lore, or material</yellow>.
+    resultFormat: '<#7b75aa>• {itemName} x{amount} in <b><aqua>{vaultName}</aqua></b>'
+    results: |-
+      <gray>Found {amount} itemstacks matching '<aqua><b>{query}</b></aqua>'.</gray>
+      <gold>---- <aqua><b>Search Results</b></aqua> ----</gold>
+      {results}
+      <gold>----- <green>{previousPage} <gray>Page: {page}/{maxPages}</gray> {nextPage}</green> -----</gold>
+    previousPage: '«'
+    nextPage: '»'

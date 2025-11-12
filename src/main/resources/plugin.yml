@@ -13,7 +13,7 @@ commands:
     description: Alias for /malts vaults <index?>
     aliases: [pv, vault, vaults, chest]
   warehouse:
-    description: Alias for /malts warehouse
+    description: Alias for /malts warehouse <deposit|withdraw?> <material> <amount>
     aliases: [es, wh]
   vaultother:
     description: Alias for /malts vaultother <name> <index?>
@@ -21,6 +21,9 @@ commands:
   vaultname:
     description: Alias for /malts vaultbyname <name>
     aliases: [pvn, chestname]
+  vaultsearch:
+    description: Alias for /malts search <query> -page <page?> -player <name?>
+    aliases: [pvs, pvsearch, chestsearch]
 permissions:
   malts.*:
     description: A permission node for Malts intended for admins.
@@ -52,6 +55,8 @@ permissions:
       malts.command.warehouse: true
       malts.command.quickreturn: true
       malts.command.vaultname: true
+      malts.command.search: true
+      malts.searchother: true
   malts.command.*:
     children:
       malts.command.base: true
@@ -66,6 +71,7 @@ permissions:
       malts.command.warehouse: true
       malts.command.quickreturn: true
       malts.command.vaultname: true
+      malts.command.search: true
   malts.bypass.*:
     children:
       malts.bypass.openvault: true
@@ -75,4 +81,7 @@ permissions:
     default: op
   malts.bypass.economy:
     description: Allows a player to bypass economy checks.
+    default: op
+  malts.searchother:
+    description: Allows a player to search other players' vaults.
     default: op

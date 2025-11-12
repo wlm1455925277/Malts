@@ -5,6 +5,8 @@ import dev.jsinco.malts.configuration.ConfigManager;
 import dev.jsinco.malts.configuration.files.Config;
 import dev.jsinco.malts.integration.Integration;
 import dev.jsinco.malts.storage.DataSource;
+import dev.jsinco.malts.utility.ClassUtil;
+import dev.jsinco.malts.utility.Text;
 import org.bstats.bukkit.Metrics;
 import org.bstats.charts.SimplePie;
 import org.bstats.charts.SingleLineChart;
@@ -22,6 +24,11 @@ public class BStatsIntegration implements Integration.Compiled {
 
     @Override
     public void register() {
+        if (isMockBukkit() || isUnitTest()) {
+            Text.log("Skipping bStats integration registration (MockBukkit/Unit Test detected).");
+            return;
+        }
+
         this.metrics = new Metrics(Malts.getInstance(), ID);
 
         DataSource dataSource = DataSource.getInstance();
@@ -35,5 +42,13 @@ public class BStatsIntegration implements Integration.Compiled {
         );
 
         metrics.addCustomChart(new SimplePie("storage_driver", () -> config.storage().driver().toString()));
+    }
+
+    private static boolean isMockBukkit() {
+        return ClassUtil.classExists("org.mockbukkit.MockBukkit");
+    }
+
+    private static boolean isUnitTest() {
+        return System.getProperty("java.class.path").contains("test");
     }
 }

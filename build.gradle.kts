@@ -11,6 +11,8 @@ plugins {
     id("com.gradleup.shadow") version "8.3.5"
     id("io.papermc.hangar-publish-plugin") version "0.1.2"
     id("com.modrinth.minotaur") version "2.8.7"
+    id("xyz.jpenilla.run-paper") version "2.3.1"
+    id("io.freefair.lombok") version "9.1.0"
 }
 
 group = "dev.jsinco.malts"
@@ -31,7 +33,6 @@ repositories {
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT") // repo.papermc.io
-    compileOnly("org.projectlombok:lombok:1.18.30") // mavenCentral
     compileOnly("org.xerial:sqlite-jdbc:3.47.2.0") // mavenCentral
     compileOnly("org.jetbrains:annotations:26.0.2-1") // mavenCentral
     compileOnly("com.drtshock.playervaults:PlayerVaultsX:4.4.7") // repo.jsinco.dev
@@ -41,14 +42,16 @@ dependencies {
     compileOnly("com.griefcraft:lwc:2.2.9-dev") // repo.codemc.io
     compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.9-beta1") // maven.enginehub.org
     compileOnly("com.sk89q.worldguard:worldguard-core:7.0.9-beta1") // maven.enginehub.org
-    compileOnly("com.palmergames.bukkit.towny:towny:0.101.2.0") // repo.glaremasters.me
+    compileOnly("com.palmergames.bukkit.towny:towny:0.101.2.0") /* repo.glaremasters.me */ {
+        exclude(group = "com.palmergames.adventure")
+    }
     compileOnly("net.coreprotect:coreprotect:23.0") // maven.playpro.com
     compileOnly("com.github.MilkBowl:VaultAPI:1.7") /* jitpack.io */ {
         exclude(group = "org.bukkit")
     }
     compileOnly("org.black_ixx:playerpoints:3.3.3") // repo.rosewooddev.io
     compileOnly("com.artillexstudios.axvaults:AxVaults:2.10.1") /* repo.jsinco.dev */ {
-        exclude("org.jetbrains", "annotations")
+        exclude(group = "org.jetbrains", module = "annotations")
     }
 
 
@@ -57,10 +60,25 @@ dependencies {
     implementation("eu.okaeri:okaeri-configs-serdes-bukkit:5.0.5")  // storehouse.okaeri.eu
     implementation("org.bstats:bstats-bukkit:3.0.2") // mavenCentral
 
-    annotationProcessor("org.projectlombok:lombok:1.18.30") // mavenCentral
+    // Tests
+    testImplementation(platform("org.junit:junit-bom:5.10.0")) // mavenCentral
+    testImplementation("org.junit.jupiter:junit-jupiter") // mavenCentral
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher") // mavenCentral
+    testImplementation("org.mockbukkit.mockbukkit:mockbukkit-v1.21:4.98.0") // mavenCentral
+    testImplementation("org.xerial:sqlite-jdbc:3.47.0.0") // mavenCentral
+    testImplementation("ch.qos.logback:logback-classic:1.5.6") // mavenCentral
+    testImplementation("io.papermc.paper:paper-api:1.21.10-R0.1-SNAPSHOT") // repo.papermc.io
 }
 
 tasks {
+
+    runServer {
+        minecraftVersion("1.21.10")
+    }
+
+    test {
+        useJUnitPlatform()
+    }
 
     shadowJar {
         val shaded = "dev.jsinco.malts.shaded"

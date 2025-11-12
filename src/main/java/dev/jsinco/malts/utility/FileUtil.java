@@ -18,7 +18,6 @@ public final class FileUtil {
 
 
     public static String readInternalResource(String path) {
-        //ClassLoader loader = pluginClassLoader != null ? pluginClassLoader : FileUtil.class.getClassLoader();
         ClassLoader loader = Malts.class.getClassLoader();
         try (InputStream inputStream = loader.getResourceAsStream(path)) {
             if (inputStream == null) {

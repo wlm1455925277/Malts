@@ -1,5 +1,6 @@
 package dev.jsinco.malts.commands.subcommands;
 
+import com.google.common.base.Preconditions;
 import dev.jsinco.malts.Malts;
 import dev.jsinco.malts.commands.interfaces.SubCommand;
 import dev.jsinco.malts.gui.WarehouseGui;
@@ -12,12 +13,9 @@ import lombok.Getter;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 public class WarehouseCommand implements SubCommand {
 
@@ -63,7 +61,7 @@ public class WarehouseCommand implements SubCommand {
         Player player = (Player) sender;
         DataSource dataSource = DataSource.getInstance();
         Warehouse warehouse = dataSource.cachedObject(player.getUniqueId(), Warehouse.class);
-        Objects.requireNonNull(warehouse);
+        Preconditions.checkNotNull(warehouse, "Warehouse cannot be null for tab completion");
 
         return switch (args.size()) {
             case 1 -> Arrays.stream(ArgOption.values())

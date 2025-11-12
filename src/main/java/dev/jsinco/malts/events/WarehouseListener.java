@@ -14,10 +14,16 @@ import org.bukkit.event.player.PlayerItemConsumeEvent;
 
 public class WarehouseListener implements Listener {
 
-    private void handle(Event event, Player player, boolean failSilently) {
-        MaltsPlayer maltsPlayer = DataSource.getInstance().cachedObject(player.getUniqueId(), MaltsPlayer.class);
+    private void handle(Event event, Player player, boolean expectCached) {
+        DataSource dataSource = DataSource.getInstance();
+        MaltsPlayer maltsPlayer = dataSource.cachedObject(player.getUniqueId(), MaltsPlayer.class);
         if (maltsPlayer == null) {
-            if (!failSilently) throw new IllegalStateException("MaltsPlayer is not cached. UUID: " + player.getUniqueId());
+            if (!expectCached) {
+                dataSource.cacheObject(dataSource.getMaltsPlayer(player.getUniqueId())).thenAccept(cached -> {
+                    // Not sure how they weren't cached, but future events should be fine now.
+                });
+                throw new IllegalStateException("MaltsPlayer is not cached. UUID: " + player.getUniqueId());
+            }
             return;
         }
         maltsPlayer.getWarehouseMode().handle(event, maltsPlayer, player);

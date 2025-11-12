@@ -1,5 +1,6 @@
 package dev.jsinco.malts.configuration;
 
+import com.google.common.base.Preconditions;
 import dev.jsinco.malts.Malts;
 import dev.jsinco.malts.configuration.serdes.IntPairTransformer;
 import dev.jsinco.malts.registry.Registry;
@@ -22,7 +23,7 @@ import static dev.jsinco.malts.storage.DataSource.DATA_FOLDER;
 
 @Getter
 @Accessors(fluent = true)
-public class ConfigManager implements RegistryCrafter.Extension<OkaeriConfig>{
+public class ConfigManager implements RegistryCrafter.Extension<OkaeriConfig> {
 
     @Override
     public <T extends OkaeriConfig> T craft(Class<?> clazz) {
@@ -32,6 +33,7 @@ public class ConfigManager implements RegistryCrafter.Extension<OkaeriConfig>{
         }
 
         String fileName = annotation.dynamicFileName() ? dynamicFileName(annotation) : annotation.value();
+        Preconditions.checkNotNull(fileName, "Dynamic file name could not be resolved for " + clazz.getName());
 
         return eu.okaeri.configs.ConfigManager.create((Class<T>) clazz, (it) -> {
             it.withConfigurer(new YamlBukkitConfigurer(), new StandardSerdes());

@@ -3,6 +3,7 @@ package dev.jsinco.malts;
 import dev.jsinco.malts.commands.MaltsBaseCommand;
 import dev.jsinco.malts.commands.VaultNameBaseCommand;
 import dev.jsinco.malts.commands.VaultOtherBaseCommand;
+import dev.jsinco.malts.commands.VaultSearchBaseCommand;
 import dev.jsinco.malts.commands.VaultsBaseCommand;
 import dev.jsinco.malts.commands.WarehouseBaseCommand;
 import dev.jsinco.malts.events.ChatPromptInputListener;
@@ -17,8 +18,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
 
-
-public final class Malts extends JavaPlugin {
+public class Malts extends JavaPlugin {
 
     @Getter
     private static Malts instance;
@@ -39,6 +39,7 @@ public final class Malts extends JavaPlugin {
         getServer().getPluginCommand("warehouse").setExecutor(new WarehouseBaseCommand());
         getServer().getPluginCommand("vaultother").setExecutor(new VaultOtherBaseCommand());
         getServer().getPluginCommand("vaultname").setExecutor(new VaultNameBaseCommand());
+        getServer().getPluginCommand("vaultsearch").setExecutor(new VaultSearchBaseCommand());
 
         getServer().getPluginManager().registerEvents(new PlayerListener(), this);
         getServer().getPluginManager().registerEvents(new VaultListener(), this);
@@ -55,7 +56,7 @@ public final class Malts extends JavaPlugin {
 
         for (Player player : getServer().getOnlinePlayers()) {
             Inventory inv = player.getOpenInventory().getTopInventory();
-            if (inv.getHolder(false) instanceof MaltsInventory) {
+            if (inv != null && inv.getHolder(false) instanceof MaltsInventory) {
                 player.closeInventory();
             }
         }

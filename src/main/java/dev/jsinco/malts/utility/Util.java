@@ -3,6 +3,8 @@ package dev.jsinco.malts.utility;
 import com.google.gson.Gson;
 import dev.jsinco.malts.Malts;
 import dev.jsinco.malts.utility.interfaces.EditMeta;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.Inventory;
@@ -11,7 +13,9 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
 public final class Util {
@@ -153,6 +157,47 @@ public final class Util {
             }
         }
         return newString;
+    }
+
+    @SafeVarargs
+    public static Component replaceComponents(Component passed, Couple<String, Object>... pairs) {
+        if (passed == null) {
+            return null;
+        }
+
+        // I hate this but whatever
+
+        Component newComponent = passed;
+        for (Couple<String, Object> pair : pairs) {
+            if (pair.b() instanceof Component component) {
+                newComponent = newComponent.replaceText(builder -> builder
+                        .match(Pattern.quote(pair.a()))
+                        .replacement(component));
+            } else if (pair.b() instanceof Collection<?> collection) {
+                List<Component> components = collection.stream()
+                        .map(obj -> {
+                            if (obj instanceof Component comp) {
+                                return comp;
+                            } else {
+                                return Component.text(String.valueOf(obj));
+                            }
+                        })
+                        .toList();
+
+                Component joined = Component.join(JoinConfiguration.newlines(), components);
+
+                newComponent = newComponent.replaceText(builder -> builder
+                        .match(Pattern.quote(pair.a()))
+                        .replacement(joined));
+            } else {
+                newComponent = newComponent.replaceText(builder -> builder
+                        .match(Pattern.quote(pair.a()))
+                        .replacement(String.valueOf(pair.b())));
+            }
+
+
+        }
+        return newComponent;
     }
 
     public static List<String> replaceAll(List<String> list, String charArray, String charArrayReplacement) {

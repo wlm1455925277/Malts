@@ -11,6 +11,7 @@ import lombok.Getter;
 import lombok.experimental.Accessors;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -97,6 +98,7 @@ public class Lang extends OkaeriFile {
         private VaultOther vaultOther = new VaultOther();
         private Reload reload = new Reload();
         private QuickReturn quickReturn = new QuickReturn();
+        private Search search = new Search();
 
         @Getter
         @Accessors(fluent = true)
@@ -139,6 +141,18 @@ public class Lang extends OkaeriFile {
             private String success;
             private String failed;
         }
+
+        @Getter
+        @Accessors(fluent = true)
+        public static class Search extends OkaeriConfig {
+            private String noResults;
+            private String resultFormat;
+            private String results;
+            private String previousPage;
+            private String nextPage;
+            private String playerNotFound;
+            private String noAccessibleVaults;
+        }
     }
 
     @Getter
@@ -157,6 +171,36 @@ public class Lang extends OkaeriFile {
     }
 
 
+    @SafeVarargs
+    @Nullable
+    public final Component entry(@Nullable String entry, boolean prefix, Couple<String, Object>... placeholders) {
+        if (entry == null) {
+            entry = "<red>Lang entry was not found.";
+        } else if (entry.isEmpty()) {
+            return null;
+        }
+
+        return Text.mm((prefix ? this.prefix : "") + Util.replace(entry, placeholders));
+    }
+
+    @NotNull
+    public final Component entry(FunctionalLang functionalLang, String defaultValue, Couple<String, Object>... placeholders) {
+        String entry = functionalLang.get(this);
+        if (entry == null || entry.isEmpty()) {
+            entry = defaultValue;
+        }
+
+        return Text.mm(Util.replace(entry, placeholders));
+    }
+
+    @NotNull
+    public final Component entry(@Nullable String entry, String defaultValue, Couple<String, Object>... placeholders) {
+        if (entry == null || entry.isEmpty()) {
+            entry = defaultValue;
+        }
+
+        return Text.mm(Util.replace(entry, placeholders));
+    }
 
     @SafeVarargs
     @Nullable

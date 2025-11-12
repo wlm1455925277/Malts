@@ -23,18 +23,18 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class ChatPromptInputListener implements Listener {
 
-    private static final Queue<ChatInputCallback> queuedChatPrompts = new ConcurrentLinkedQueue<>();
+    private static final Queue<ChatInputCallback> QUEUED_CHAT_PROMPTS = new ConcurrentLinkedQueue<>();
 
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onAsyncChat(AsyncChatEvent event) {
-        if (queuedChatPrompts.isEmpty()) {
+        if (QUEUED_CHAT_PROMPTS.isEmpty()) {
             return;
         }
 
         Player player = event.getPlayer();
 
-        queuedChatPrompts.removeIf(callback -> {
+        QUEUED_CHAT_PROMPTS.removeIf(callback -> {
             if (callback.isTimedOut()) return true;
             if (callback.uuid.equals(player.getUniqueId())) {
                 String input = PlainTextComponentSerializer.plainText().serialize(event.originalMessage());
@@ -64,7 +64,7 @@ public class ChatPromptInputListener implements Listener {
                 Text.msg(player, msg);
             }
             ChatInputCallback chatInputCallback = new ChatInputCallback(player.getUniqueId(), System.currentTimeMillis(), handler, cancelled);
-            queuedChatPrompts.add(chatInputCallback);
+            QUEUED_CHAT_PROMPTS.add(chatInputCallback);
             return chatInputCallback;
         }
 

@@ -4,7 +4,6 @@ import dev.jsinco.malts.api.events.gui.MaltsGuiOpenEvent;
 import dev.jsinco.malts.obj.MaltsInventory;
 import dev.jsinco.malts.gui.item.AbstractGuiItem;
 import dev.jsinco.malts.gui.item.IgnoreAutoRegister;
-import dev.jsinco.malts.utility.Couple;
 import dev.jsinco.malts.utility.Executors;
 import dev.jsinco.malts.utility.Text;
 import lombok.Getter;

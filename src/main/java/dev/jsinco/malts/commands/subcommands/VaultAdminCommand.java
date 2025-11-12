@@ -138,6 +138,17 @@ public class VaultAdminCommand implements SubCommand {
                 return null;
             }
             return List.of();
+        }),
+        SEARCH((plugin, sender, label, args, offlinePlayer) -> {
+            SearchCommand searchCommand = Registry.SUB_COMMANDS.get(SearchCommand.class);
+            if (searchCommand.playerOnly() && !(sender instanceof Player)) return false;
+
+            List<String>  newArgs = Util.plusFirstIndex(args, "-player", offlinePlayer.getName());
+            return searchCommand.execute(plugin, sender, label, newArgs);
+        }, (plugin, sender, label, args, offlinePlayer) -> {
+            SearchCommand searchCommand = Registry.SUB_COMMANDS.get(SearchCommand.class);
+
+            return searchCommand.tabComplete(plugin, sender, label, Util.plusFirstIndex(args, "-player", offlinePlayer.getName()));
         })
         ;
 
