@@ -4,6 +4,8 @@ import dev.jsinco.malts.registry.RegistryCrafter;
 import dev.jsinco.malts.utility.Text;
 
 public class IntegrationCrafter implements RegistryCrafter.Extension<Integration> {
+
+    @SuppressWarnings("unchecked")
     @Override
     public <T extends Integration> T craft(Class<?> clazz) {
         try {
@@ -14,7 +16,7 @@ public class IntegrationCrafter implements RegistryCrafter.Extension<Integration
                 return instance;
             }
         } catch (ReflectiveOperationException e) {
-            e.printStackTrace();
+            Text.error("Failed to register integration for: " + clazz.getName(), e);
         }
         return null;
     }

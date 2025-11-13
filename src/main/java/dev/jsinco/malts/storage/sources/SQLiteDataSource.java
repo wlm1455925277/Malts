@@ -57,6 +57,7 @@ public class SQLiteDataSource extends DataSource {
         return hikariConfig;
     }
 
+    // TODO: Better logging
     @Override
     public CompletableFuture<Void> createTables() {
         return Executors.supplyAsyncWithSQLException(() -> {

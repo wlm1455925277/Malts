@@ -64,7 +64,7 @@ public class PlayerVaultsImporter implements Importer {
                     try {
                         return com.drtshock.playervaults.vaultmanagement.CardboardBoxSerialization.fromStorage(base64, uuidAsString);
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Text.error("Failed to import a vault for " + owner + " from PlayerVaults.", e);
                         return null;
                     }
                 })

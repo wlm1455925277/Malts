@@ -114,7 +114,7 @@ public class EditVaultGui extends MaltsGui {
 
                     DataSource.getInstance().saveVault(vault);
 
-                    iconItem.setType(clickedItem.getType());
+                    iconItem.setType(clickedItem.getType()); // TODO: deprecated method
                     itemConfirmation.setConfirmation(false);
                 }
             })

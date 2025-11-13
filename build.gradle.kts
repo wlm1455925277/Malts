@@ -66,8 +66,9 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher") // mavenCentral
     testImplementation("org.mockbukkit.mockbukkit:mockbukkit-v1.21:4.98.0") // mavenCentral
     testImplementation("org.xerial:sqlite-jdbc:3.47.0.0") // mavenCentral
-    testImplementation("ch.qos.logback:logback-classic:1.5.6") // mavenCentral
+    testImplementation("ch.qos.logback:logback-classic:1.5.13") // mavenCentral
     testImplementation("io.papermc.paper:paper-api:1.21.10-R0.1-SNAPSHOT") // repo.papermc.io
+    testImplementation("org.yaml:snakeyaml:2.5") // mavenCentral
 }
 
 tasks {

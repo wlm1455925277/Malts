@@ -244,15 +244,13 @@ public class Lang extends OkaeriFile {
         }
         return comp;
     }
-
-
-
-    public interface FunctionalLang {
-        String get(Lang lang);
-    }
-
+    
     @Override
     public String name() {
         return "lang.yml";
+    }
+
+    public interface FunctionalLang {
+        String get(Lang lang);
     }
 }

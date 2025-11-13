@@ -6,6 +6,7 @@ import dev.jsinco.malts.commands.VaultOtherBaseCommand;
 import dev.jsinco.malts.commands.VaultSearchBaseCommand;
 import dev.jsinco.malts.commands.VaultsBaseCommand;
 import dev.jsinco.malts.commands.WarehouseBaseCommand;
+import dev.jsinco.malts.configuration.ConfigManager;
 import dev.jsinco.malts.events.ChatPromptInputListener;
 import dev.jsinco.malts.events.GuiListener;
 import dev.jsinco.malts.events.PlayerListener;
@@ -33,6 +34,7 @@ public class Malts extends JavaPlugin {
     @Override
     public void onEnable() {
         DataSource.createInstance();
+        ConfigManager.createTranslationConfigs();
 
         getServer().getPluginCommand("malts").setExecutor(new MaltsBaseCommand());
         getServer().getPluginCommand("vaults").setExecutor(new VaultsBaseCommand());

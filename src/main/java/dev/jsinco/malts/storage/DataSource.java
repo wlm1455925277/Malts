@@ -188,6 +188,7 @@ public abstract class DataSource {
         return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
     }
 
+    // TODO: Better logging
     public CompletableFuture<Void> close() {
         // Wait for all saves to complete, then close hikari
         return clearCache()

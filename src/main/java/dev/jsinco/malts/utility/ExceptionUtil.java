@@ -24,6 +24,7 @@ public final class ExceptionUtil {
         }
     }
 
+    // TODO: Better logging
     public static <U> U runWithSQLExceptionHandling(ThrowingSQLExceptionWithReturn<U> supplier) {
         try {
             return supplier.run();

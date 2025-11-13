@@ -6,6 +6,7 @@ import dev.jsinco.malts.configuration.serdes.IntPairTransformer;
 import dev.jsinco.malts.registry.Registry;
 import dev.jsinco.malts.registry.RegistryCrafter;
 import dev.jsinco.malts.utility.FileUtil;
+import dev.jsinco.malts.utility.Text;
 import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.serdes.standard.StandardSerdes;
 import eu.okaeri.configs.yaml.bukkit.YamlBukkitConfigurer;
@@ -25,20 +26,22 @@ import static dev.jsinco.malts.storage.DataSource.DATA_FOLDER;
 @Accessors(fluent = true)
 public class ConfigManager implements RegistryCrafter.Extension<OkaeriConfig> {
 
+    public static final String TRANSLATIONS_FOLDER = "translations";
+
     @Override
     public <T extends OkaeriConfig> T craft(Class<?> clazz) {
         OkaeriFileName annotation = clazz.getAnnotation(OkaeriFileName.class);
         if (annotation == null) {
             throw new IllegalStateException("OkaeriFile must be annotated with @OkaeriFileName");
         }
-
         String fileName = annotation.dynamicFileName() ? dynamicFileName(annotation) : annotation.value();
         Preconditions.checkNotNull(fileName, "Dynamic file name could not be resolved for " + clazz.getName());
+        Path bindFile = DATA_FOLDER.resolve(fileName);
 
-        return eu.okaeri.configs.ConfigManager.create((Class<T>) clazz, (it) -> {
+        T config = eu.okaeri.configs.ConfigManager.create((Class<T>) clazz, (it) -> {
             it.withConfigurer(new YamlBukkitConfigurer(), new StandardSerdes());
             it.withRemoveOrphans(false);
-            it.withBindFile(DATA_FOLDER.resolve(fileName));
+            it.withBindFile(bindFile);
             it.withSerdesPack(serdes -> {
                 serdes.register(new IntPairTransformer());
             });
@@ -46,6 +49,12 @@ public class ConfigManager implements RegistryCrafter.Extension<OkaeriConfig> {
             it.saveDefaults();
             it.load(true);
         });
+
+        if (annotation.dynamicFileName()) {
+            NullKeyMerger.mergeWithInternalDefaults(config, bindFile);
+        }
+
+        return config;
     }
 
     private String dynamicFileName(OkaeriFileName annotation) {
@@ -66,8 +75,8 @@ public class ConfigManager implements RegistryCrafter.Extension<OkaeriConfig> {
     }
 
     public static void createTranslationConfigs() {
-        Path targetDir = DATA_FOLDER.resolve("translations");
-        File[] internalLangs = FileUtil.listInternalFiles("/translations");
+        Path targetDir = DATA_FOLDER.resolve(TRANSLATIONS_FOLDER);
+        File[] internalLangs = FileUtil.listInternalFiles("/" + TRANSLATIONS_FOLDER);
 
         try {
             if (!Files.exists(targetDir)) {
@@ -78,22 +87,16 @@ public class ConfigManager implements RegistryCrafter.Extension<OkaeriConfig> {
                 Path targetFile = targetDir.resolve(file.getName());
                 if (Files.exists(targetFile)) continue;
 
-                try (InputStream in = Malts.class.getResourceAsStream("/translations/" + file.getName())) {
+                try (InputStream in = Malts.class.getResourceAsStream("/" + TRANSLATIONS_FOLDER + "/" + file.getName())) {
                     if (in == null) {
-                        //Text.debug("Could not find internal translation: " + file.getName());
                         continue;
                     }
                     Files.copy(in, targetFile, StandardCopyOption.REPLACE_EXISTING);
-                    //Text.debug("Copied translation: " + file.getName());
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            Text.error("Failed to create translation config files", e);
         }
-    }
-
-    static {
-        createTranslationConfigs();
     }
 
 }

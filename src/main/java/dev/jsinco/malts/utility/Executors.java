@@ -34,6 +34,7 @@ public final class Executors {
         return Bukkit.getAsyncScheduler().runNow(instance, consumer);
     }
 
+    // TODO: Better logging
     public static BukkitTask runAsync(Runnable runnable) {
         return Bukkit.getScheduler().runTaskAsynchronously(instance, () -> {
             try {
@@ -56,6 +57,7 @@ public final class Executors {
 
     // CompletableFuture
 
+    // TODO: Better logging
     public static <U> CompletableFuture<U> supplyAsyncWithSQLException(ExceptionUtil.ThrowingSQLExceptionWithReturn<U> supplier) {
         if (!Malts.isShutdown()) {
             return CompletableFuture.supplyAsync(() -> ExceptionUtil.runWithSQLExceptionHandling(supplier)).exceptionally(throwable -> {
@@ -67,6 +69,7 @@ public final class Executors {
         }
     }
 
+    // TODO: Better logging
     public static <U> CompletableFuture<U> supplyAsyncWithSQLException(ExceptionUtil.ThrowingSQLExceptionWithReturn<U> supplier, Executor executor) {
         if (!Malts.isShutdown()) {
             return CompletableFuture.supplyAsync(() -> ExceptionUtil.runWithSQLExceptionHandling(supplier), executor).exceptionally(throwable -> {
@@ -84,6 +87,7 @@ public final class Executors {
         return Bukkit.getScheduler().runTaskLater(instance, runnable, delay);
     }
 
+    // TODO: Better logging
     public static BukkitTask sync(Runnable runnable) {
         return Bukkit.getScheduler().runTask(instance, () -> {
             try {

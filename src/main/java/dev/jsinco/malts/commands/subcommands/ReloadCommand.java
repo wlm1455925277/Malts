@@ -9,6 +9,7 @@ import dev.jsinco.malts.enums.Driver;
 import dev.jsinco.malts.registry.Registry;
 import dev.jsinco.malts.storage.DataSource;
 import dev.jsinco.malts.utility.Couple;
+import dev.jsinco.malts.utility.Text;
 import org.bukkit.command.CommandSender;
 
 import java.util.Comparator;
@@ -35,7 +36,7 @@ public class ReloadCommand implements SubCommand {
                 });
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Text.error("An error occurred while reloading Malts configuration", e);
             success = false;
         }
 

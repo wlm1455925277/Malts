@@ -29,6 +29,14 @@ public final class FileUtil {
         }
     }
 
+    public static File readInternalFile(String path) {
+        URL url = Malts.class.getResource(path);
+        if (url == null) {
+            throw new IllegalArgumentException("Resource not found: " + path);
+        }
+        return new File(url.getFile());
+    }
+
 
     public static File[] listInternalFiles(String path) {
         try {
@@ -59,7 +67,7 @@ public final class FileUtil {
                 return new File[0];
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Text.error("Failed to list internal files at path: " + path, e);
             return new File[0];
         }
     }
