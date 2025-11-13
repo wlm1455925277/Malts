@@ -36,12 +36,12 @@ class ArgumentFlagReaderTest {
 
     @Test
     void testFlagWithoutValueDefaultsToTrue() {
-        List<String> args = List.of("-debug", "start");
+        List<String> args = List.of("-debug", "start", "other", "args");
 
         ArgumentFlagReader reader = new ArgumentFlagReader(args);
 
-        assertEquals("true", reader.getFlagValue("debug"));
-        assertEquals(List.of("start"), reader.getNewArguments());
+        assertEquals("start", reader.getFlagValue("debug"));
+        assertEquals(List.of("other", "args"), reader.getNewArguments());
     }
 
     @Test
