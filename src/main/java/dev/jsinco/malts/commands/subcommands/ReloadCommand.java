@@ -6,6 +6,7 @@ import dev.jsinco.malts.configuration.ConfigManager;
 import dev.jsinco.malts.configuration.OkaeriFile;
 import dev.jsinco.malts.configuration.files.Config;
 import dev.jsinco.malts.enums.Driver;
+import dev.jsinco.malts.integration.compiled.UpdateCheckIntegration;
 import dev.jsinco.malts.registry.Registry;
 import dev.jsinco.malts.storage.DataSource;
 import dev.jsinco.malts.utility.Couple;
@@ -42,6 +43,12 @@ public class ReloadCommand implements SubCommand {
 
         final boolean finalSuccess = success;
         lng.entry(l -> finalSuccess ? l.command().reload().success() : l.command().reload().failed(), sender);
+        if (finalSuccess) {
+            UpdateCheckIntegration updateCheck = Registry.INTEGRATIONS.get(UpdateCheckIntegration.class);
+            if (updateCheck != null && updateCheck.isUpdateAvailable()) {
+                updateCheck.sendUpdateMessage(sender);
+            }
+        }
         return true;
     }
 

@@ -14,6 +14,8 @@ public class IntegrationCrafter implements RegistryCrafter.Extension<Integration
                 instance.register();
                 Text.log("Registered integration for: " + instance.name());
                 return instance;
+            } else {
+                Text.debug("Skipped registration for integration: " + instance.name());
             }
         } catch (ReflectiveOperationException e) {
             Text.error("Failed to register integration for: " + clazz.getName(), e);

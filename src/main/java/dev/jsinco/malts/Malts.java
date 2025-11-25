@@ -12,12 +12,16 @@ import dev.jsinco.malts.events.GuiListener;
 import dev.jsinco.malts.events.PlayerListener;
 import dev.jsinco.malts.events.VaultListener;
 import dev.jsinco.malts.events.WarehouseListener;
+import dev.jsinco.malts.integration.Integration;
 import dev.jsinco.malts.obj.MaltsInventory;
+import dev.jsinco.malts.registry.Registry;
 import dev.jsinco.malts.storage.DataSource;
 import lombok.Getter;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.Map;
 
 public class Malts extends JavaPlugin {
 
@@ -35,6 +39,8 @@ public class Malts extends JavaPlugin {
     public void onEnable() {
         DataSource.createInstance();
         ConfigManager.createTranslationConfigs();
+        // Needs to be here to prevent lazy init
+        Registry<Integration> integrationRegistry =  Registry.INTEGRATIONS;
 
         getServer().getPluginCommand("malts").setExecutor(new MaltsBaseCommand());
         getServer().getPluginCommand("vaults").setExecutor(new VaultsBaseCommand());

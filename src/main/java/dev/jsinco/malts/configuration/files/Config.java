@@ -26,6 +26,7 @@ public class Config extends OkaeriFile {
             "The file must be located in the 'translations' directory.",
             "If you would like to use a language file that is not provided by Malts,",
             "you will need to create it yourself and place it in the 'translations' directory.",
+            "* Options: en_us (English, US), zh_cn (Chinese, Simplified)"
     })
     private String language = "en_us";
 
@@ -35,6 +36,9 @@ public class Config extends OkaeriFile {
 
     @Comment("Toggles debug messages.")
     private boolean verboseLogging = false;
+
+    @Comment("Enables or disables the update checker.")
+    private boolean updateChecker = true;
 
 
     @Comment({

@@ -1,4 +1,5 @@
 prefix: '<#b986f9><b>Malts</b></#b986f9> <dark_gray>»</dark_gray> '
+updateAvailable: 'A new version of Malts is available! Download it from: <aqua>{url}</aqua>. <gray>(v{version})</gray>'
 
 warehouse:
   notEnoughMaterial: You don't have enough <aqua><b>{material}</b></aqua> to do this.

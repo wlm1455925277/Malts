@@ -9,6 +9,7 @@ import eu.okaeri.configs.OkaeriConfig;
 import eu.okaeri.configs.annotation.CustomKey;
 import lombok.Getter;
 import lombok.experimental.Accessors;
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
@@ -27,6 +28,7 @@ import java.util.List;
 public class Lang extends OkaeriFile {
 
     private String prefix;
+    private String updateAvailable;
 
     private Warehouse warehouse = new Warehouse();
     private Vaults vaults = new Vaults();
@@ -217,7 +219,7 @@ public class Lang extends OkaeriFile {
 
     @SafeVarargs
     @Nullable
-    public final Component entry(FunctionalLang functionalLang, CommandSender receiver, Couple<String, Object>... placeholders) {
+    public final Component entry(FunctionalLang functionalLang, Audience receiver, Couple<String, Object>... placeholders) {
         Component comp = this.entry(functionalLang, true, placeholders);
         if (comp != null) {
             receiver.sendMessage(comp);
@@ -227,7 +229,7 @@ public class Lang extends OkaeriFile {
 
     @SafeVarargs
     @Nullable
-    public final Component entry(FunctionalLang functionalLang, List<CommandSender> receivers, Couple<String, Object>... placeholders) {
+    public final Component entry(FunctionalLang functionalLang, List<Audience> receivers, Couple<String, Object>... placeholders) {
         Component comp = this.entry(functionalLang, true, placeholders);
         if (comp != null) {
             receivers.forEach(receiver -> receiver.sendMessage(comp));
@@ -237,7 +239,7 @@ public class Lang extends OkaeriFile {
 
     @SafeVarargs
     @Nullable
-    public final Component actionBarEntry(FunctionalLang functionalLang, CommandSender receiver, Couple<String, Object>... placeholders) {
+    public final Component actionBarEntry(FunctionalLang functionalLang, Audience receiver, Couple<String, Object>... placeholders) {
         Component comp = this.entry(functionalLang, false, placeholders);
         if (comp != null) {
             receiver.sendActionBar(comp);
