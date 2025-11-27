@@ -1,10 +1,12 @@
 package dev.jsinco.malts.commands.subcommands;
 
+import com.google.common.base.Preconditions;
 import dev.jsinco.malts.Malts;
 import dev.jsinco.malts.commands.interfaces.SubCommand;
 import dev.jsinco.malts.configuration.ConfigManager;
 import dev.jsinco.malts.configuration.files.Config;
 import dev.jsinco.malts.obj.CachedObject;
+import dev.jsinco.malts.obj.MaltsPlayer;
 import dev.jsinco.malts.obj.Vault;
 import dev.jsinco.malts.storage.DataSource;
 import dev.jsinco.malts.utility.Couple;
@@ -21,8 +23,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class EditVaultCommand implements SubCommand {
@@ -41,7 +46,7 @@ public class EditVaultCommand implements SubCommand {
         DataSource dataSource = DataSource.getInstance();
         int vaultId = Util.getInteger(args.getFirst(), -1);
         ArgOption option = Util.getEnum(args.get(1), ArgOption.class);
-        List<String> newArgs = args.subList(1, args.size());
+        List<String> newArgs = args.subList(2, args.size());
 
         if (vaultId <= 0 || option == null) return false;
 
@@ -56,14 +61,26 @@ public class EditVaultCommand implements SubCommand {
 
     @Override
     public List<String> tabComplete(Malts plugin, CommandSender sender, String label, List<String> args) {
+        if (!(sender instanceof Player player)) return List.of();
         return switch (args.size()) {
-            case 1 -> Stream.of(ArgOption.values()).map(it -> it.toString().toLowerCase()).toList();
-            case 2 -> {
-                if (!(sender instanceof Player player)) yield List.of();
-                ArgOption option = Util.getEnum(args.getFirst(), ArgOption.class);
+            case 1 -> {
+                DataSource dataSource = DataSource.getInstance();
+                MaltsPlayer maltsPlayer = dataSource.cachedObject(player.getUniqueId(), MaltsPlayer.class);
+                Preconditions.checkNotNull(maltsPlayer, "MaltsPlayer should not be null for online player.");
+                // List of vault IDs the player has access to
+                yield IntStream.rangeClosed(1, maltsPlayer.getCalculatedMaxVaults())
+                        .mapToObj(String::valueOf)
+                        .collect(Collectors.toList());
+            }
+
+            case 2 -> Stream.of(ArgOption.values()).map(it -> it.toString().toLowerCase()).toList();
+
+            case 3 -> {
+                ArgOption option = Util.getEnum(args.get(1), ArgOption.class);
+                int vaultId = Util.getInteger(args.get(0), 1);
                 if (option == null) yield List.of();
 
-                yield option.getTabCompleter().handle(player);
+                yield option.getTabCompleter().handle(player, vaultId);
             }
             default -> List.of();
         };
@@ -100,7 +117,7 @@ public class EditVaultCommand implements SubCommand {
                 lng.entry(l -> l.vaults().vaultNameTooLong(), sender, Couple.of("{maxLength}", maxLength));
             }
             return true;
-        }, (sender) -> List.of()),
+        }, (sender, vaultId) -> List.of()),
         ICON(((dataSource, sender, vault, args) -> {
             if (args.isEmpty()) return false;
 
@@ -112,8 +129,8 @@ public class EditVaultCommand implements SubCommand {
             dataSource.saveVault(vault);
             lng.entry(l -> l.vaults().iconChanged(), sender, Couple.of("{material}", Util.formatEnumerator(material)));
             return true;
-        }), (sender) -> ICON_MATERIAL_NAMES),
-        TRUSTED((dataSource, sender, vault, args) -> {
+        }), (sender, vaultId) -> ICON_MATERIAL_NAMES),
+        TRUST((dataSource, sender, vault, args) -> {
             if (args.isEmpty()) return false;
 
             String name = args.getFirst();
@@ -136,15 +153,26 @@ public class EditVaultCommand implements SubCommand {
             } else {
                 lng.entry(l -> l.vaults().trustListMaxed(), sender, Couple.of("{trustedListSize}", trustListCap));
             }
+
+            dataSource.saveVault(vault);
             return true;
-        }, (sender) ->{
+        }, (sender, vaultId) ->{
             UUID playerUUID = sender.getUniqueId();
             DataSource dataSource = DataSource.getInstance();
             CachedTrustedNames cachedVaultNames = dataSource.cachedObject(playerUUID, CachedTrustedNames.class);
 
             if (cachedVaultNames == null) {
-                CompletableFuture<CachedTrustedNames> future = dataSource.getVaultNames(playerUUID)
-                        .thenApply(vaultNames -> new CachedTrustedNames(playerUUID, vaultNames));
+                CompletableFuture<CachedTrustedNames> future = dataSource.getVault(playerUUID, vaultId)
+                        .thenApply(vault -> {
+                            List<String> names = vault.getTrustedPlayers().stream()
+                                    .map(uuid -> {
+                                        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+                                        return offlinePlayer.getName();
+                                    })
+                                    .filter(Objects::nonNull)
+                                    .toList();
+                            return new CachedTrustedNames(playerUUID, names);
+                        });
                 // 7s expire time
                 dataSource.cacheObject(future, 7000).thenAccept(cached -> {
                     // No action needed here for tab completion
@@ -163,7 +191,7 @@ public class EditVaultCommand implements SubCommand {
         }
 
         private interface TabCompleter {
-            List<String> handle(Player sender);
+            List<String> handle(Player sender, int vaultId);
         }
     }
 

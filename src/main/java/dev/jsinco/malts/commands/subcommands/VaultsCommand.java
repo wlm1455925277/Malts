@@ -1,22 +1,17 @@
 package dev.jsinco.malts.commands.subcommands;
 
+import com.google.common.base.Preconditions;
 import dev.jsinco.malts.Malts;
 import dev.jsinco.malts.commands.interfaces.SubCommand;
-import dev.jsinco.malts.configuration.ConfigManager;
-import dev.jsinco.malts.configuration.files.Config;
 import dev.jsinco.malts.gui.YourVaultsGui;
-import dev.jsinco.malts.integration.EconomyIntegration;
 import dev.jsinco.malts.obj.MaltsPlayer;
 import dev.jsinco.malts.storage.DataSource;
 import dev.jsinco.malts.utility.Couple;
 import dev.jsinco.malts.utility.Util;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -27,6 +22,7 @@ public class VaultsCommand implements SubCommand {
         Player player = (Player) sender;
         DataSource dataSource = DataSource.getInstance();
         MaltsPlayer maltsPlayer = dataSource.cachedObject(player.getUniqueId(), MaltsPlayer.class);
+        Preconditions.checkNotNull(maltsPlayer, "MaltsPlayer should not be null for online player.");
 
         if (args.isEmpty()) {
             YourVaultsGui yourVaultsGui = new YourVaultsGui(maltsPlayer);
@@ -56,6 +52,7 @@ public class VaultsCommand implements SubCommand {
         Player player = (Player) sender;
         DataSource dataSource = DataSource.getInstance();
         MaltsPlayer maltsPlayer = dataSource.cachedObject(player.getUniqueId(), MaltsPlayer.class);
+        Preconditions.checkNotNull(maltsPlayer, "MaltsPlayer should not be null for online player.");
         // List of vault IDs the player has access to
         return IntStream.rangeClosed(1, maltsPlayer.getCalculatedMaxVaults())
                 .mapToObj(String::valueOf)
