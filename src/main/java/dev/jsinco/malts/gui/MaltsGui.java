@@ -17,6 +17,11 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Represents a GUI inventory in Malts.
+ * GUIs are special inventories that are not the same as vaults.
+ * Primarily, they are used for menus and other interactive interfaces.
+ */
 @Getter
 public abstract class MaltsGui implements MaltsInventory {
 

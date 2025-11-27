@@ -32,6 +32,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+/**
+ * Represents a transient vault inventory in Malts.
+ */
 @Getter
 @Setter
 public class Vault implements MaltsInventory {

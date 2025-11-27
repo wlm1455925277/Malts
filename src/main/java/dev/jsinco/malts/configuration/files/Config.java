@@ -147,7 +147,9 @@ public class Config extends OkaeriFile {
                 "'malts.maxvaults.<amount>' permissions.",
                 "Or, by using '/malts max vaults add <player> <amount>'.",
         })
-        private int defaultMaxVaults = 5;
+        private int defaultMaxVaults = 0;
+
+
     }
 
 
@@ -204,7 +206,7 @@ public class Config extends OkaeriFile {
                 "'malts.maxstock.<amount>' permissions.",
                 "Or, by using '/malts max stock add <player> <amount>'.",
         })
-        private int defaultMaxStock = 500;
+        private int defaultMaxStock = 0;
     }
 
     private Economy economy = new Economy();

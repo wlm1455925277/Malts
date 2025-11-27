@@ -21,8 +21,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.Map;
-
 public class Malts extends JavaPlugin {
 
     @Getter
