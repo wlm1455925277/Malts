@@ -6,10 +6,11 @@ import dev.jsinco.malts.Malts;
 import dev.jsinco.malts.configuration.ConfigManager;
 import dev.jsinco.malts.configuration.files.Config;
 import dev.jsinco.malts.configuration.files.Lang;
+import dev.jsinco.malts.enums.TriState;
 import dev.jsinco.malts.integration.Integration;
 import dev.jsinco.malts.utility.Couple;
 import dev.jsinco.malts.utility.Text;
-import lombok.Getter;
+import dev.jsinco.malts.utility.Util;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -41,9 +42,8 @@ public class UpdateCheckIntegration implements Integration.Compiled {
             this.resolvedLatestVersion = resolved;
             Text.debug("Resolved latest Malts version from GitHub: " + resolvedLatestVersion);
 
-            int localVer = parseVersion(localVersion);
-            int latestVer = parseVersion(resolvedLatestVersion);
-            if (!resolvedLatestVersion.equals(UNRESOLVED) && latestVer > localVer) {
+            TriState comparison = compareSemantic(resolvedLatestVersion, localVersion);
+            if (!resolvedLatestVersion.equals(UNRESOLVED) && comparison == TriState.TRUE) {
                 this.updateAvailable = true;
 
                 Lang lang = ConfigManager.get(Lang.class);
@@ -104,13 +104,38 @@ public class UpdateCheckIntegration implements Integration.Compiled {
 
     }
 
-    private int parseVersion(String version) {
-        StringBuilder sb = new StringBuilder();
-        for (char c : version.toCharArray()) {
-            if (Character.isDigit(c)) {
-                sb.append(c);
+    /**
+     * Compares two semantic version strings.
+     *
+     * @param v1 The first version string.
+     * @param v2 The second version string.
+     * @return TriState.TRUE if v1 > v2, TriState.FALSE if v1 < v2, TriState.ALTERNATIVE_STATE if equal.
+     */
+    public static TriState compareSemantic(String v1, String v2) {
+        String v1Core = v1.replaceFirst("^v", "").split("-")[0];
+        String v2Core = v2.replaceFirst("^v", "").split("-")[0];
+
+        int coreComparison = compare(v1Core, v2Core);
+
+        if (coreComparison > 0) return TriState.TRUE;
+        if (coreComparison < 0) return TriState.FALSE;
+        return TriState.ALTERNATIVE_STATE;
+    }
+
+    private static int compare(String c1, String c2) {
+        String[] parts1 = c1.split("\\.");
+        String[] parts2 = c2.split("\\.");
+
+        int maxLength = Math.max(parts1.length, parts2.length);
+        for (int i = 0; i < maxLength; i++) {
+            int num1 = i < parts1.length ? Util.getInteger(parts1[i], 0) : 0;
+            int num2 = i < parts2.length ? Util.getInteger(parts2[i], 0) : 0;
+
+            if (num1 != num2) {
+                return Integer.compare(num1, num2);
             }
         }
-        return Integer.parseInt(sb.toString());
+        return 0;
     }
+
 }

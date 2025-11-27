@@ -95,7 +95,7 @@ public class MaltsPlayer implements CachedObject {
 
 
     @Override
-    public CompletableFuture<Void> save(DataSource dataSource) {
+    public @NotNull CompletableFuture<Void> save(DataSource dataSource) {
         return dataSource.saveMaltsPlayer(this);
     }
 

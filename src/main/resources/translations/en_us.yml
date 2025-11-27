@@ -38,6 +38,7 @@ vaults:
   vaultNameTooLong: Vault names cannot be longer than {maxLength} characters.
   transferred: Transferred {amount}x vaults from {name} to {otherName} and {otherAmount}x vaults from {otherName} to {name}.
   cannotTransfer: Cannot transfer vaults between the same player.
+  iconChanged: Vault icon changed to <aqua><b>{material}</b></aqua>.
 
 gui:
   firstPage: You are on the first page.

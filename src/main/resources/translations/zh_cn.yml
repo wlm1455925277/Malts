@@ -38,6 +38,7 @@ vaults:
   vaultNameTooLong: 保险箱名称不能长于 {maxLength} 个字符。
   transferred: 成功从 {name} 转移了 {amount} 个保险箱到 {otherName}。从 {otherName} 转移了 {otherAmount} 个保险箱到 {name}。
   cannotTransfer: 不能在同一玩家之间转移保险箱。
+  iconChanged: Vault icon changed to <aqua><b>{material}</b></aqua>.
 
 gui:
   firstPage: 你已经在第一页了。

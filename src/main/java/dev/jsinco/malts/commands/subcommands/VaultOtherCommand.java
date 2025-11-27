@@ -32,8 +32,11 @@ public class VaultOtherCommand implements SubCommand {
 
         int vaultId = Util.getInteger(args.get(1), 1);
 
-        dataSource.getVault(target.getUniqueId(), vaultId).thenAccept(vault -> {
-            if (!vault.canAccess(player)) {
+        dataSource.getVault(target.getUniqueId(), vaultId, false).thenAccept(vault -> {
+            if (vault == null) {
+                lng.entry(l -> l.vaults().noVaultFound(), player, Couple.of("{id}", vaultId));
+                return;
+            } else if (!vault.canAccess(player)) {
                 lng.entry(l -> l.vaults().noAccess(), player, Couple.of("{id}", vaultId));
                 return;
             }

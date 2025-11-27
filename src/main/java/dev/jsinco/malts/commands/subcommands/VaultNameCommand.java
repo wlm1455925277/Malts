@@ -8,6 +8,7 @@ import dev.jsinco.malts.utility.Couple;
 import lombok.Getter;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -74,7 +75,7 @@ public class VaultNameCommand implements SubCommand {
     }
 
     @Getter
-    public static class CachedVaultNames implements CachedObject {
+    private static class CachedVaultNames implements CachedObject {
 
         private final UUID owner;
         private final List<String> vaultNames;
@@ -86,7 +87,7 @@ public class VaultNameCommand implements SubCommand {
         }
 
         @Override
-        public UUID getUuid() {
+        public @NotNull UUID getUuid() {
             return owner;
         }
 
@@ -101,7 +102,7 @@ public class VaultNameCommand implements SubCommand {
         }
 
         @Override
-        public CompletableFuture<Void> save(DataSource dataSource) {
+        public @NotNull CompletableFuture<Void> save(DataSource dataSource) {
             return CompletableFuture.completedFuture(null);
         }
     }

@@ -24,6 +24,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -183,13 +184,13 @@ public class Warehouse implements CachedObject {
 
 
     @Override
-    public UUID getUuid() {
+    public @NotNull UUID getUuid() {
         return owner;
     }
 
 
     @Override
-    public CompletableFuture<Void> save(DataSource dataSource) {
+    public @NotNull CompletableFuture<Void> save(DataSource dataSource) {
         return dataSource.saveWarehouse(this);
     }
 

@@ -1,6 +1,7 @@
 package dev.jsinco.malts.registry;
 
 import dev.jsinco.malts.commands.interfaces.SubCommand;
+import dev.jsinco.malts.commands.subcommands.EditVaultCommand;
 import dev.jsinco.malts.commands.subcommands.HelpCommand;
 import dev.jsinco.malts.commands.subcommands.ImportCommand;
 import dev.jsinco.malts.commands.subcommands.MaxCommand;
@@ -43,7 +44,7 @@ import java.util.stream.Stream;
 
 public class Registry<T extends RegistryItem> implements Iterable<Map.Entry<String, T>> {
 
-    public static final Registry<SubCommand> SUB_COMMANDS = fromClasses(VaultsCommand.class, WarehouseCommand.class, ImportCommand.class, VaultOtherCommand.class, WarehouseAdminCommand.class, MaxCommand.class, VaultAdminCommand.class, ReloadCommand.class, HelpCommand.class, QuickReturnCommand.class, VaultNameCommand.class, SearchCommand.class);
+    public static final Registry<SubCommand> SUB_COMMANDS = fromClasses(VaultsCommand.class, WarehouseCommand.class, ImportCommand.class, VaultOtherCommand.class, WarehouseAdminCommand.class, MaxCommand.class, VaultAdminCommand.class, ReloadCommand.class, HelpCommand.class, QuickReturnCommand.class, VaultNameCommand.class, SearchCommand.class, EditVaultCommand.class);
     public static final Registry<Importer> IMPORTERS = fromClasses(PlayerVaultsImporter.class, AxVaultsImporter.class);
     public static final Registry<OkaeriFile> CONFIGS = fromClassesWithCrafter(new ConfigManager(), Config.class, GuiConfig.class, Lang.class);
     public static final Registry<Integration> INTEGRATIONS = fromClassesWithCrafter(new IntegrationCrafter(), BStatsIntegration.class, CoreProtectIntegration.class, VaultIntegration.class, PlayerPointsIntegration.class, UpdateCheckIntegration.class);

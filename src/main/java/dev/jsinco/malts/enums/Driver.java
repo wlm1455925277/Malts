@@ -31,8 +31,6 @@ public enum Driver {
         return (T) supplier.supply(config);
     }
 
-
-
     public interface DriverSupplier {
         DataSource supply(Config.Storage config);
     }

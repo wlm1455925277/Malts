@@ -1,7 +1,10 @@
 package dev.jsinco.malts.enums;
 
 public enum TriState {
-    TRUE, FALSE, ALTERNATIVE_STATE;
+
+    FALSE,
+    ALTERNATIVE_STATE,
+    TRUE;
 
     public boolean toBoolean() {
         return this == TRUE;

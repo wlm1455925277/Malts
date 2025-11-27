@@ -77,6 +77,7 @@ public class Lang extends OkaeriFile {
         private String vaultNameTooLong;
         private String transferred;
         private String cannotTransfer;
+        private String iconChanged;
     }
 
     @Getter

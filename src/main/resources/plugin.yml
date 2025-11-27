@@ -1,3 +1,4 @@
+# TODO: Swap to gradle plugin instead of this.
 main: dev.jsinco.malts.Malts
 name: Malts
 version: '${version}'
@@ -56,6 +57,7 @@ permissions:
       malts.command.quickreturn: true
       malts.command.vaultname: true
       malts.command.search: true
+      malts.command.editvault: true
       malts.searchother: true
   malts.command.*:
     children:
@@ -72,6 +74,7 @@ permissions:
       malts.command.quickreturn: true
       malts.command.vaultname: true
       malts.command.search: true
+      malts.command.editvault: true
   malts.bypass.*:
     children:
       malts.bypass.openvault: true

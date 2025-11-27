@@ -18,6 +18,7 @@ import dev.jsinco.malts.utility.Text;
 import dev.jsinco.malts.utility.Util;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -110,12 +111,14 @@ public class EditVaultGui extends MaltsGui {
                 if (isClicked) {
                     itemConfirmation.setConfirmation(!currentValue);
                 } else if (currentValue && clickedInventory != event.getInventory()) {
-                    if (!vault.setIcon(clickedItem.getType())) return;
+                    Material newType = clickedItem.getType();
+                    if (!vault.setIcon(newType)) return;
 
                     DataSource.getInstance().saveVault(vault);
 
-                    iconItem.setType(clickedItem.getType()); // TODO: deprecated method
+                    iconItem.setType(newType); // TODO: deprecated method
                     itemConfirmation.setConfirmation(false);
+                    lng.entry(l -> l.vaults().iconChanged(), event.getWhoClicked(), Couple.of("{material}", Util.formatEnumerator(newType)));
                 }
             })
             .build();
