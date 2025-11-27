@@ -16,7 +16,7 @@ plugins {
 }
 
 group = "dev.jsinco.malts"
-version = "0.9-BETA"
+version = "1.0"
 
 repositories {
     mavenCentral()
