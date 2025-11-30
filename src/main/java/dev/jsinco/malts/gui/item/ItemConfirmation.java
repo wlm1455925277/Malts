@@ -6,15 +6,9 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 
-public class ItemConfirmation {
+public record ItemConfirmation(ItemStack itemStack) {
 
     private static final NamespacedKey KEY = Util.namespacedKey("confirmed");
-
-    private final ItemStack itemStack;
-
-    public ItemConfirmation(ItemStack itemStack) {
-        this.itemStack = itemStack;
-    }
 
     public boolean isConfirmed() {
         Boolean value = Util.getPersistentKey(itemStack, KEY, PersistentDataType.BOOLEAN);

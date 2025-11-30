@@ -52,15 +52,15 @@ public abstract class DataSource {
     private static final int SAVE_INTERVAL_SECONDS = 60;
     private static final int TASK_INTERVAL_SECONDS = 2;
 
-    protected final ExecutorService singleThread = Executors.newSingleThreadExecutor();
-
     @Getter
     private static DataSource instance;
+
+    protected final ExecutorService singleThread = Executors.newSingleThreadExecutor();
+    private final ConcurrentLinkedQueue<CachedObject> cachedObjects = new ConcurrentLinkedQueue<>();
+
     @Getter
     private final HikariDataSource hikari;
     private ScheduledTask cacheTask;
-
-    private final ConcurrentLinkedQueue<CachedObject> cachedObjects = new ConcurrentLinkedQueue<>();
 
     public abstract HikariConfig hikariConfig(Config.Storage config);
     public abstract CompletableFuture<Void> createTables();
@@ -73,7 +73,7 @@ public abstract class DataSource {
     public abstract CompletableFuture<@NotNull Boolean> deleteVault(UUID owner, int id);
     public abstract CompletableFuture<@NotNull Integer> deleteVaults(UUID owner);
     public abstract CompletableFuture<@NotNull Collection<Vault>> getAllVaults(); // Used for exporting vaults. (Mainly to other plugins)
-    public abstract CompletableFuture<List<String>> getVaultNames(UUID owner);
+    public abstract CompletableFuture<@NotNull List<String>> getVaultNames(UUID owner);
 
 
     public abstract CompletableFuture<@NotNull Warehouse> getWarehouse(UUID owner);

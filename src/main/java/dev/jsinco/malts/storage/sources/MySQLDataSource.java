@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-@SuppressWarnings("DuplicatedCode") // TODO: Abstract out common code
+@SuppressWarnings("DuplicatedCode") // TODO: Extract out common code
 public class MySQLDataSource extends DataSource {
 
     public MySQLDataSource(Config.Storage config) {

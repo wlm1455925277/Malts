@@ -148,8 +148,6 @@ public class Config extends OkaeriFile {
                 "Or, by using '/malts max vaults add <player> <amount>'.",
         })
         private int defaultMaxVaults = 0;
-
-
     }
 
 

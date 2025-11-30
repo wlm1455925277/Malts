@@ -34,7 +34,7 @@ public abstract class MaltsGui implements MaltsInventory {
         this.guiItems = new ArrayList<>();
     }
 
-    public abstract void onInventoryClick(InventoryClickEvent event);
+    protected abstract void onInventoryClick(InventoryClickEvent event);
     public abstract void openImpl(Player player);
 
 
@@ -70,7 +70,7 @@ public abstract class MaltsGui implements MaltsInventory {
         }
 
         // Let children handle the rest
-        onInventoryClick(event);
+        this.onInventoryClick(event);
     }
 
     protected void autoRegister(Class<?> forClass) {

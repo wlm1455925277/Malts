@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-// I want to make this configurable in the future, but I need to get stuff done first.
+
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ItemStacks {
 

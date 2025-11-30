@@ -3,7 +3,6 @@ package dev.jsinco.malts.obj;
 import com.google.common.collect.ImmutableList;
 import dev.jsinco.malts.configuration.ConfigManager;
 import dev.jsinco.malts.configuration.files.GuiConfig;
-import dev.jsinco.malts.configuration.files.Lang;
 import dev.jsinco.malts.gui.EditVaultGui;
 import dev.jsinco.malts.gui.item.AbstractGuiItem;
 import dev.jsinco.malts.storage.DataSource;

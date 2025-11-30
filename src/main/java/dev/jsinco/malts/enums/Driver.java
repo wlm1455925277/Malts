@@ -27,6 +27,7 @@ public enum Driver {
         return asString;
     }
 
+    @SuppressWarnings("unchecked")
     public <T extends DataSource> T supply(Config.Storage config) {
         return (T) supplier.supply(config);
     }

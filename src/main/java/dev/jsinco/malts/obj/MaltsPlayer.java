@@ -5,6 +5,8 @@ import dev.jsinco.malts.configuration.ConfigManager;
 import dev.jsinco.malts.enums.QuickReturnClickType;
 import dev.jsinco.malts.enums.WarehouseMode;
 import dev.jsinco.malts.storage.DataSource;
+import dev.jsinco.malts.utility.Text;
+import dev.jsinco.malts.utility.Util;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
@@ -21,8 +23,10 @@ import java.util.regex.Pattern;
 @Setter
 public class MaltsPlayer implements CachedObject {
 
-    private static final Config cfg = ConfigManager.get(Config.class);
+    private static final String MAX_VAULTS_PERMISSION_PREFIX = "malts.maxvaults";
+    private static final String MAX_WAREHOUSE_STOCK_PERMISSION_PREFIX = "malts.maxstock";
 
+    private static final Config cfg = ConfigManager.get(Config.class);
 
     private Long expire;
 
@@ -64,13 +68,13 @@ public class MaltsPlayer implements CachedObject {
 
 
     public int getCalculatedMaxVaults() {
-        int maxByPermission = getMaxByPermission("malts.maxvaults");
+        int maxByPermission = getMaxByPermission(MAX_VAULTS_PERMISSION_PREFIX);
 
         return Math.max(maxByPermission + maxVaults, cfg.vaults().defaultMaxVaults());
     }
 
     public int getCalculatedMaxWarehouseStock() {
-        int maxByPermission = getMaxByPermission("malts.maxstock");
+        int maxByPermission = getMaxByPermission(MAX_WAREHOUSE_STOCK_PERMISSION_PREFIX);
 
         return Math.max(maxByPermission + maxWarehouseStock, cfg.warehouse().defaultMaxStock());
     }
@@ -85,7 +89,9 @@ public class MaltsPlayer implements CachedObject {
                 .map(permission -> {
                     var matcher = maxPermPattern.matcher(permission.getPermission());
                     if (matcher.matches()) {
-                        return Integer.parseInt(matcher.group(1));
+                        int amt = Util.getInteger(matcher.group(1), -1);
+                        if (amt < 0) Text.warn("Invalid permission format for player " + player.getName() + ": " + permission.getPermission());
+                        return amt;
                     }
                     return 0;
                 })

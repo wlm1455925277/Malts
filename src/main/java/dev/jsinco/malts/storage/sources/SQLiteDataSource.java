@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-@SuppressWarnings("DuplicatedCode") // TODO: Abstract out common code
+@SuppressWarnings("DuplicatedCode") // TODO: Extract out common code
 public class SQLiteDataSource extends DataSource {
 
     public SQLiteDataSource(Config.Storage config) {

@@ -1,6 +1,5 @@
 package dev.jsinco.malts.gui.item;
 
-import dev.jsinco.malts.Malts;
 import dev.jsinco.malts.utility.Util;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -17,7 +16,7 @@ public interface AbstractGuiItem {
 
     default NamespacedKey key() {
         String name = this.getClass().getSimpleName() + "_" + System.identityHashCode(this);
-        return new NamespacedKey(Malts.getInstance(), name);
+        return Util.namespacedKey(name);
     }
 
     @Nullable
