@@ -1,10 +1,6 @@
 # Malts
 
-An open-source and free Vaults plugin that incorporates a warehouse for mass item storage.
-
-
-> [!IMPORTANT]
-> This project is currently in beta!
+An open-source and free vaults plugin that incorporates a warehouse for mass item storage.
 
 Beta builds can be found on Modrinth and Hangar:
 
@@ -23,9 +19,9 @@ Beta builds can be found on Modrinth and Hangar:
 - A converter to migrate from "PlayerVaults/PlayerVaultsX".
 
 
-## Some more info on Malts (for those who aren't familiar):
+## Some more info on Malts (for those who aren't familiar with vaults plugins):
 
-- Malts is an open-source plugin that allows players to use vaults and a warehouse to store items.
+- Malts is a plugin that allows players to use vaults and a warehouse to store items.
 
 
 ### Vaults

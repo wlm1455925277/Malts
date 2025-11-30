@@ -9,7 +9,7 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * <p>
- * A cached object is a data object held in an instance Malts' {@link DataSource}.
+ * A cached object is a data object held in an instance of Malts' {@link DataSource}.
  * A cached object may have the same UUID as another cached object of a different type,
  * but may not have multiple instances of the same type with the same UUID.
  * </p>
@@ -17,7 +17,7 @@ import java.util.concurrent.CompletableFuture;
  * <p>
  * Cached objects will be checked every 100ms to see if they are expired and
  * will be saved at Malts' set save interval of 60s.
- * If an object does not have a null expiration time and is past it's expiration time,
+ * If an object does not have a null expiration time and is past its expiration time,
  * Malts will save the object by using the {@link #save(DataSource)} method declared in the object
  * and remove it from the cache.
  * If an object has a null {@link #getExpire} time, the object will never automatically be removed
