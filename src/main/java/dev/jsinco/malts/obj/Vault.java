@@ -34,6 +34,9 @@ import java.util.UUID;
 
 /**
  * Represents a transient vault inventory in Malts.
+ * 
+ * @see dev.jsinco.malts.storage.DataSource#getVault(UUID, int) 
+ * @see dev.jsinco.malts.storage.DataSource#saveVault(Vault) 
  */
 @Getter
 @Setter
@@ -116,6 +119,12 @@ public class Vault implements MaltsInventory {
         return GSON.toJson(trustedPlayers, LIST_UUID_TYPE_TOKEN);
     }
 
+    /**
+     * Opens this vault for the specified player running normal Malts checks
+     * such as the open state and API events.
+     * 
+     * @param player the player to open the vault for
+     */
     public void open(Player player) {
         Executors.runSync(() -> {
             Couple<VaultOpenState, Player> couple = this.getOpenState();
@@ -139,6 +148,12 @@ public class Vault implements MaltsInventory {
         });
     }
 
+    /**
+     * Gets the open state of this vault.
+     * 
+     * @return a couple containing the open state and the player who has it open, if any
+     * @see #update(Player) 
+     */
     public Couple<@NotNull VaultOpenState, @Nullable Player> getOpenState() {
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (this.equals(player.getOpenInventory().getTopInventory().getHolder(false))) {
@@ -151,10 +166,20 @@ public class Vault implements MaltsInventory {
         return Couple.of(VaultOpenState.CLOSED, null);
     }
 
-    public void update(Player updater) {
+    /**
+     * Malts holds no references to open vaults.
+     * This method updates all open inventories of this vault for all players except the updater.
+     * This method runs synchronously, avoid superfluous calls.
+     * 
+     * @param updater the player who initiated the update, may be null
+     */
+    public void update(@Nullable Player updater) {
         Executors.delayedSync(1, () -> {
             for (Player player : Bukkit.getOnlinePlayers()) {
-                if (player.getUniqueId() == updater.getUniqueId()) continue;
+                if (updater != null && player.getUniqueId() == updater.getUniqueId()) {
+                    continue;
+                }
+                
                 Inventory inv = player.getOpenInventory().getTopInventory();
                 if (this.equals(inv.getHolder(false))) {
                     inv.setContents(this.inventory.getContents());
@@ -172,6 +197,11 @@ public class Vault implements MaltsInventory {
         return trustedPlayers.contains(uuid) || uuid == owner;
     }
 
+    /**
+     * Adds a trusted player to this vault.
+     * @param uuid the UUID of the player to trust
+     * @return true if the player was added, false if the player was already trusted or the trust cap was reached
+     */
     public boolean addTrusted(UUID uuid) {
         int cap = cfg.vaults().trustCap();
         VaultTrustPlayerEvent event = new VaultTrustPlayerEvent(this, EventAction.ADD, uuid, !Bukkit.isPrimaryThread());
@@ -184,6 +214,11 @@ public class Vault implements MaltsInventory {
         return true;
     }
 
+    /**
+     * Removes a trusted player from this vault.
+     * @param uuid the UUID of the player to untrust
+     * @return true if the player was removed, false if the player was not trusted
+     */
     public boolean removeTrusted(UUID uuid) {
         if (!trustedPlayers.contains(uuid)) return false;
         VaultTrustPlayerEvent event = new VaultTrustPlayerEvent(this, EventAction.REMOVE, uuid, !Bukkit.isPrimaryThread());
@@ -193,6 +228,11 @@ public class Vault implements MaltsInventory {
         return true;
     }
 
+    /**
+     * Sets the custom name of this vault.
+     * @param customName the new custom name
+     * @return true if the name was set, false if the name was too long
+     */
     public boolean setCustomName(@NotNull String customName) {
         int maxLength = cfg.vaults().maxNameCharacters();
         VaultNameChangeEvent event = new VaultNameChangeEvent(this, customName, !Bukkit.isPrimaryThread());
@@ -208,6 +248,11 @@ public class Vault implements MaltsInventory {
         return true;
     }
 
+    /**
+     * Sets the icon of this vault.
+     * @param icon the new icon
+     * @return true if the icon was set, false otherwise
+     */
     public boolean setIcon(@NotNull Material icon) {
         VaultIconChangeEvent event = new VaultIconChangeEvent(this, icon, !Bukkit.isPrimaryThread());
         if (!event.callEvent()) return false;
@@ -216,6 +261,11 @@ public class Vault implements MaltsInventory {
         return true;
     }
 
+    /**
+     * Creates a copy of this vault for a new owner.
+     * @param newOwner the UUID of the new owner
+     * @return a copy of this vault
+     */
     public Vault copy(UUID newOwner) {
         Vault copy = new Vault(newOwner, this.id);
         copy.setCustomName(this.customName);

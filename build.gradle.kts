@@ -120,6 +120,11 @@ tasks {
 
 }
 
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(21)
+    withSourcesJar() // FIXME for maven publish
+}
+
 modrinth {
     token.set(System.getenv("MODRINTH_TOKEN") ?: run {
         return@modrinth
