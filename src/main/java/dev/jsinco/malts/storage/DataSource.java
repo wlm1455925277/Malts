@@ -402,7 +402,7 @@ public abstract class DataSource {
         createInstance(config.storage());
     }
 
-    public static void createInstance(Config.Storage config) {
+    public static void createInstance(Config.Storage config) throws IllegalStateException {
         TriState closed = instance != null ? instance.isClosed() : TriState.TRUE;
         if (closed != TriState.TRUE) {
             throw new IllegalStateException(closed == TriState.ALTERNATIVE_STATE ? "DataSource is not properly closed." : "DataSource is not closed.");
@@ -414,6 +414,8 @@ public abstract class DataSource {
                 instance.cacheObject(instance.getMaltsPlayer(player.getUniqueId()));
                 instance.cacheObject(instance.getWarehouse(player.getUniqueId()));
             }
+        }).exceptionally(ex -> {
+            throw new IllegalStateException("An exception/error occurred while setting up the DataSource", ex);
         });
     }
 }
