@@ -9,7 +9,6 @@ import dev.jsinco.malts.obj.MaltsPlayer;
 import dev.jsinco.malts.obj.SnapshotVault;
 import dev.jsinco.malts.obj.Warehouse;
 import dev.jsinco.malts.storage.DataSource;
-import dev.jsinco.malts.utility.Couple;
 import dev.jsinco.malts.utility.Executors;
 import dev.jsinco.malts.utility.ItemStacks;
 import dev.jsinco.malts.utility.Text;
@@ -112,7 +111,7 @@ public class YourVaultsGui extends MaltsGui implements PromisedInventory {
                 }
 
                 addGuiItem(snapshotVault);
-                itemStacks.add(snapshotVault.guiItemStack());
+                itemStacks.add(snapshotVault.getItemStack());
             }
             IntPair slots = withQuickbar ? cfg.yourVaultsGui().vaultItem().slots() : cfg.yourVaultsGui().vaultItem().altSlots();
             List<Integer> ignoredSlots = withQuickbar ? cfg.yourVaultsGui().vaultItem().ignoredSlots() : cfg.yourVaultsGui().vaultItem().altIgnoredSlots();
@@ -163,8 +162,8 @@ public class YourVaultsGui extends MaltsGui implements PromisedInventory {
 
         int previousPageSlot = quickBar ? cfg.yourVaultsGui().previousPage().slot() : cfg.yourVaultsGui().previousPage().altSlot();
         int nextPageSlot = quickBar ? cfg.yourVaultsGui().nextPage().slot() : cfg.yourVaultsGui().nextPage().altSlot();
-        inv.setItem(previousPageSlot, previousPage.guiItemStack());
-        inv.setItem(nextPageSlot, nextPage.guiItemStack());
+        inv.setItem(previousPageSlot, previousPage.getItemStack());
+        inv.setItem(nextPageSlot, nextPage.getItemStack());
 
         IntPair slots = quickBar ? cfg.yourVaultsGui().vaultItem().slots() : cfg.yourVaultsGui().vaultItem().altSlots();
         IntPair warehouseSlots = quickBar ? cfg.yourVaultsGui().warehouseQuickbar().slots() : null;
@@ -197,7 +196,7 @@ public class YourVaultsGui extends MaltsGui implements PromisedInventory {
             return false;
         }
 
-        inv.setItem(warehouseButtonSlot, warehouseButton.guiItemStack());
+        inv.setItem(warehouseButtonSlot, warehouseButton.getItemStack());
 
         List<Integer> ignoredSlots = cfg.yourVaultsGui().warehouseQuickbar().ignoredSlots();
         for (int i = 0; i < Math.min(amount, warehouseItems.size()); i++) {
@@ -205,7 +204,7 @@ public class YourVaultsGui extends MaltsGui implements PromisedInventory {
                 continue;
             }
             GuiItem item = warehouseItems.get(i);
-            inv.setItem(slots.a() + i, item.guiItemStack());
+            inv.setItem(slots.a() + i, item.getItemStack());
             this.addGuiItem(item);
         }
         return true;

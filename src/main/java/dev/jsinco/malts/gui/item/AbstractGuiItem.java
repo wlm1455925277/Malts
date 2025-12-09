@@ -1,5 +1,6 @@
 package dev.jsinco.malts.gui.item;
 
+import dev.jsinco.malts.Malts;
 import dev.jsinco.malts.utility.Util;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -7,24 +8,29 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.Nullable;
 
-public interface AbstractGuiItem {
+public abstract class AbstractGuiItem {
 
-    // todo: should maybe be abstract class so this can be private
-    ItemStack itemStack();
+    private ItemStack cachedItemStack;
 
-    void onClick(InventoryClickEvent event, ItemStack clickedItem);
+    protected abstract ItemStack itemStack();
 
-    default NamespacedKey key() {
+    public abstract void onClick(InventoryClickEvent event, ItemStack clickedItem);
+
+    public @Nullable Integer index() {
+        return null;
+    }
+
+
+    public final NamespacedKey key() {
         String name = this.getClass().getSimpleName() + "_" + System.identityHashCode(this);
         return Util.namespacedKey(name);
     }
 
-    @Nullable
-    default Integer index() {
-        return null;
-    }
-
-    default ItemStack guiItemStack() {
-        return Util.setPersistentKey(itemStack(), key(), PersistentDataType.BOOLEAN, true);
+    public final ItemStack getItemStack() {
+        if (this.cachedItemStack == null || Malts.isInvalidatedCachedGuiItems()) {
+            this.cachedItemStack = Util.setPersistentKey(itemStack(), key(), PersistentDataType.BOOLEAN, true);
+            Malts.setInvalidatedCachedGuiItems(false);
+        }
+        return this.cachedItemStack;
     }
 }

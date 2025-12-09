@@ -111,7 +111,7 @@ public class WarehouseGui extends MaltsGui {
                     if (nextMode == mode) return;
 
                     maltsPlayer.setWarehouseMode(nextMode);
-                    event.getInventory().setItem(cfg.warehouseGui().managerButton().slot(), self.guiItemStack());
+                    event.getInventory().setItem(cfg.warehouseGui().managerButton().slot(), self.getItemStack());
                     lng.entry(l -> l.warehouse().changedMode(), player, Couple.of("{mode}", Util.formatEnumerator(maltsPlayer.getWarehouseMode())));
                     return;
                 }
@@ -185,7 +185,7 @@ public class WarehouseGui extends MaltsGui {
                 ItemStack clickedItem = event.getCurrentItem();
                 Inventory inv = event.getInventory();
                 if (event.getClickedInventory() == inv && !ItemStacks.borderItem().isSimilar(clickedItem)) {
-                    Executors.delayedSync(1, () -> inv.setItem(cfg.warehouseGui().statusIcon().slot(), self.guiItemStack()));
+                    Executors.delayedSync(1, () -> inv.setItem(cfg.warehouseGui().statusIcon().slot(), self.getItemStack()));
                 }
             })
             .build();
@@ -199,7 +199,7 @@ public class WarehouseGui extends MaltsGui {
 
         List<ItemStack> itemStacks = new ArrayList<>();
         for (GuiItem guiItem : warehouse.stockAsGuiItems(-1)) {
-            itemStacks.add(guiItem.guiItemStack());
+            itemStacks.add(guiItem.getItemStack());
             addGuiItem(guiItem);
         }
 

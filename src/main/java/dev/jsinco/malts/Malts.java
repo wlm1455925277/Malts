@@ -17,6 +17,7 @@ import dev.jsinco.malts.obj.MaltsInventory;
 import dev.jsinco.malts.registry.Registry;
 import dev.jsinco.malts.storage.DataSource;
 import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -27,6 +28,9 @@ public class Malts extends JavaPlugin {
     private static Malts instance;
     @Getter
     private static boolean shutdown;
+    @Getter
+    @Setter
+    private static boolean invalidatedCachedGuiItems;
 
     @Override
     public void onLoad() {
@@ -38,7 +42,7 @@ public class Malts extends JavaPlugin {
         DataSource.createInstance();
         ConfigManager.createTranslationConfigs();
         // Needs to be here to prevent lazy init
-        Registry<Integration> integrationRegistry =  Registry.INTEGRATIONS;
+        Registry<Integration> ignored = Registry.INTEGRATIONS;
 
         getServer().getPluginCommand("malts").setExecutor(new MaltsBaseCommand());
         getServer().getPluginCommand("vaults").setExecutor(new VaultsBaseCommand());

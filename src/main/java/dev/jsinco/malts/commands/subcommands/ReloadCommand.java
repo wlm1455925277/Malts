@@ -36,6 +36,8 @@ public class ReloadCommand implements SubCommand {
                     lng.entry(l -> l.command().reload().newDatabaseDriverSet(), sender, Couple.of("{driver}", setDriver.toString()));
                 });
             }
+
+            Malts.setInvalidatedCachedGuiItems(true);
         } catch (Throwable e) {
             Text.error("An exception/error occurred while reloading Malts configuration", e);
             success = false;

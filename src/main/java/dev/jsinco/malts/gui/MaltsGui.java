@@ -55,7 +55,7 @@ public abstract class MaltsGui implements MaltsInventory {
 
     public void addGuiItem(AbstractGuiItem item, int index) {
         if (index >= 0 && index < inventory.getSize()) {
-            inventory.setItem(index, item.guiItemStack());
+            inventory.setItem(index, item.getItemStack());
         }
         guiItems.add(item);
     }

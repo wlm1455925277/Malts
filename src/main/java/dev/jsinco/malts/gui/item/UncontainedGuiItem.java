@@ -8,7 +8,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 @Builder
-public class UncontainedGuiItem implements AbstractGuiItem {
+public class UncontainedGuiItem extends AbstractGuiItem {
 
     @FunctionalInterface
     public interface UncontainedGuiItemAction {

@@ -27,7 +27,7 @@ import static dev.jsinco.malts.obj.Vault.LIST_UUID_TYPE_TOKEN;
 /**
  * A snapshot of a vault's data, used for displaying in GUIs without loading the full vault.
  */
-public class SnapshotVault implements AbstractGuiItem {
+public class SnapshotVault extends AbstractGuiItem {
 
     private static final GuiConfig cfg = ConfigManager.get(GuiConfig.class);
 

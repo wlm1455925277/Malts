@@ -126,7 +126,7 @@ public class VaultOtherGui extends MaltsGui implements PromisedInventory {
 
                 for (var snapshotVault : snapshotVaults) {
                     addGuiItem(snapshotVault);
-                    itemStacks.add(snapshotVault.guiItemStack());
+                    itemStacks.add(snapshotVault.getItemStack());
                 }
 
                 IntPair slots = cfg.vaultOtherGui().vaultItem().slots();
