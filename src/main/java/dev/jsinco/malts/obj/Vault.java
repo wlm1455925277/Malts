@@ -128,11 +128,12 @@ public class Vault implements MaltsInventory {
     public void open(Player player) {
         Executors.runSync(() -> {
             List<Player> viewers = this.getViewers();
-            //VaultOpenEvent event = new VaultOpenEvent(this, player, viewers, !Bukkit.isPrimaryThread());
-            //event.setCancelled();
-            Text.debug("Player " + player.getName() + " is attempting to open vault " + this.key.id() + ". Can open: " + this.canOpen(player, viewers));
+            boolean canOpen = this.canOpen(player, viewers);
+            VaultOpenEvent event = new VaultOpenEvent(this, player, viewers, !Bukkit.isPrimaryThread());
+            event.setCancelled(!canOpen);
+            Text.debug("Player " + player.getName() + " is attempting to open vault " + this.key.id() + ". Can open: " + canOpen);
 
-            if (!this.canOpen(player, viewers)) {
+            if (!event.callEvent()) {
                 ConfigManager.get(Lang.class).entry(l -> l.vaults().alreadyOpen(), player);
                 return;
             }
@@ -153,7 +154,7 @@ public class Vault implements MaltsInventory {
     }
 
 
-    public boolean canOpen(Player player, List<Player> viewers) {
+    private boolean canOpen(Player player, List<Player> viewers) {
         // A vault can be opened by a player if:
         // - No other players are viewing it
         // - The player has the bypass permission
