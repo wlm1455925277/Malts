@@ -70,13 +70,13 @@ public class MaltsPlayer implements CachedObject {
     public int getCalculatedMaxVaults() {
         int maxByPermission = getMaxByPermission(MAX_VAULTS_PERMISSION_PREFIX);
 
-        return Math.max(maxByPermission + maxVaults, cfg.vaults().defaultMaxVaults());
+        return maxByPermission + maxVaults + cfg.vaults().defaultMaxVaults();
     }
 
     public int getCalculatedMaxWarehouseStock() {
         int maxByPermission = getMaxByPermission(MAX_WAREHOUSE_STOCK_PERMISSION_PREFIX);
 
-        return Math.max(maxByPermission + maxWarehouseStock, cfg.warehouse().defaultMaxStock());
+        return maxByPermission + maxWarehouseStock + cfg.warehouse().defaultMaxStock();
     }
 
     private int getMaxByPermission(String permissionPrefix) {
