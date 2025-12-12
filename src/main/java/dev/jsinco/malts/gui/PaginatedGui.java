@@ -37,7 +37,7 @@ public class PaginatedGui {
                 currentPage.setItem(currentSlot, items.get(currentItem++));
             }
 
-            if (currentSlot >= startEndSlots.getSecond()) {
+            if (currentSlot >= startEndSlots.getSecond() && currentItem < items.size()) {
                 currentPage = newPage();
                 currentSlot = startEndSlots.getFirst();
             } else {

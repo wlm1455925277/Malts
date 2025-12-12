@@ -8,7 +8,6 @@ import dev.jsinco.malts.obj.VaultContentScanner;
 import dev.jsinco.malts.storage.DataSource;
 import dev.jsinco.malts.utility.Couple;
 import dev.jsinco.malts.utility.Util;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
