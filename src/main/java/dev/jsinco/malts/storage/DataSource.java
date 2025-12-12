@@ -16,6 +16,7 @@ import dev.jsinco.malts.obj.MaltsPlayer;
 import dev.jsinco.malts.obj.SnapshotVault;
 import dev.jsinco.malts.obj.Stock;
 import dev.jsinco.malts.obj.Vault;
+import dev.jsinco.malts.obj.VaultKey;
 import dev.jsinco.malts.obj.Warehouse;
 import dev.jsinco.malts.utility.Couple;
 import dev.jsinco.malts.utility.Executors;
@@ -40,6 +41,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -57,6 +59,7 @@ public abstract class DataSource {
 
     protected final ExecutorService singleThread = Executors.newSingleThreadExecutor();
     private final ConcurrentLinkedQueue<CachedObject> cachedObjects = new ConcurrentLinkedQueue<>();
+    private final ConcurrentHashMap<VaultKey, Object> vaultLocks = new ConcurrentHashMap<>();
 
     @Getter
     private final HikariDataSource hikari;
@@ -386,6 +389,21 @@ public abstract class DataSource {
             //new CachedObjectEvent(this, cachedObject, EventAction.REMOVE).callEvent();
         }
     }
+
+
+    public boolean isLocked(VaultKey key) {
+        return vaultLocks.containsKey(key);
+    }
+
+    public void lock(VaultKey key) {
+        vaultLocks.put(key, new Object());
+    }
+
+    public void releaseLock(VaultKey key) {
+        vaultLocks.remove(key);
+    }
+
+
 
     @Override
     public String toString() {

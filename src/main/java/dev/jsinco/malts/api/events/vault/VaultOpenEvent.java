@@ -2,11 +2,12 @@ package dev.jsinco.malts.api.events.vault;
 
 import dev.jsinco.malts.api.events.interfaces.VaultEvent;
 import dev.jsinco.malts.obj.Vault;
-import dev.jsinco.malts.utility.Couple;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
+import java.util.Set;
 
 /**
  * Called when a player attempts to open a vault.
@@ -17,15 +18,15 @@ public class VaultOpenEvent extends VaultEvent {
 
     private static final HandlerList HANDLER_LIST = new HandlerList();
 
-    private final Player viewer;
-    private final Couple<Vault.VaultOpenState, @Nullable Player> openState;
+    private final Player player;
+    private final List<Player> currentViewers;
 
     private boolean cancelled;
 
-    public VaultOpenEvent(@NotNull Vault vault, @NotNull Player viewer, @NotNull Couple<Vault.@NotNull VaultOpenState, @Nullable Player> state, boolean async) {
+    public VaultOpenEvent(@NotNull Vault vault, @NotNull Player viewer, List<Player> currentViewers, boolean async) {
         super(vault, async);
-        this.viewer = viewer;
-        this.openState = state;
+        this.player = viewer;
+        this.currentViewers = List.copyOf(currentViewers);
     }
 
     /**
@@ -33,18 +34,20 @@ public class VaultOpenEvent extends VaultEvent {
      * @return Player attempting to open the vault
      */
     @NotNull
-    public Player getViewer() {
-        return viewer;
+    public Player getPlayer() {
+        return player;
     }
 
+
     /**
-     * The state of the vault being opened, and the <b>first</b> viewer Malts found, if applicable.
-     * @return Couple of VaultOpenState and he <b>first</b> viewer Malts found (nullable)
+     * The players currently viewing the vault
+     * @return List of players currently viewing the vault
      */
     @NotNull
-    public Couple<Vault.@NotNull VaultOpenState, @Nullable Player> getOpenState() {
-        return openState;
+    public List<Player> getCurrentViewers() {
+        return currentViewers;
     }
+
 
     @Override
     public boolean isCancelled() {

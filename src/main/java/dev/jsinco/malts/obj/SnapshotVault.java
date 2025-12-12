@@ -32,9 +32,7 @@ public class SnapshotVault extends AbstractGuiItem {
     private static final GuiConfig cfg = ConfigManager.get(GuiConfig.class);
 
     @Getter
-    private final UUID owner;
-    @Getter
-    private final int id;
+    private final VaultKey key;
     @Getter
     private final String customName;
     @Getter
@@ -42,17 +40,12 @@ public class SnapshotVault extends AbstractGuiItem {
     @Getter
     private final ImmutableList<UUID> trustedPlayers;
 
-
-    @Nullable
-    private Vault lazyVault;
-
     public SnapshotVault(UUID owner, int id, String customName, Material icon) {
         this(owner, id, customName, icon, ImmutableList.of());
     }
 
     public SnapshotVault(UUID owner, int id, String customName, Material icon, ImmutableList<UUID> trustedPlayers) {
-        this.owner = owner;
-        this.id = id;
+        this.key = VaultKey.of(owner, id);
         this.customName = customName != null && !customName.isEmpty() ? customName : "Vault #" + id;
         this.icon = icon != null && icon.isItem() ? icon : Material.CHEST;
         this.trustedPlayers = trustedPlayers;
@@ -60,8 +53,7 @@ public class SnapshotVault extends AbstractGuiItem {
 
 
     public SnapshotVault(UUID owner, int id, String customName, Material icon, String trustedPlayers) {
-        this.owner = owner;
-        this.id = id;
+        this.key = VaultKey.of(owner, id);
         this.customName = customName != null && !customName.isEmpty() ? customName : "Vault #" + id;
         this.icon = icon != null && icon.isItem() ? icon : Material.CHEST;
 
@@ -72,12 +64,12 @@ public class SnapshotVault extends AbstractGuiItem {
 
     public CompletableFuture<Vault> toVault() {
         DataSource dataSource = DataSource.getInstance();
-        return dataSource.getVault(owner, id);
+        return dataSource.getVault(this.key.owner(), this.key.id());
     }
 
     public void toVaultWithEconomy(Player player, Consumer<Vault> consumer) {
         DataSource dataSource = DataSource.getInstance();
-        dataSource.getVaultWithEconomy(player, id, consumer);
+        dataSource.getVaultWithEconomy(player, this.key.id(), consumer);
     }
 
     public boolean isTrusted(UUID uuid) {
@@ -85,7 +77,7 @@ public class SnapshotVault extends AbstractGuiItem {
     }
 
     public boolean canAccess(Player player) {
-        return player.getUniqueId() == this.owner || this.trustedPlayers.contains(player.getUniqueId()) || player.hasPermission(BYPASS_OPEN_VAULT_PERM);
+        return player.getUniqueId() == this.key.owner() || this.trustedPlayers.contains(player.getUniqueId()) || player.hasPermission(BYPASS_OPEN_VAULT_PERM);
     }
 
     @SuppressWarnings("unchecked")
@@ -94,26 +86,12 @@ public class SnapshotVault extends AbstractGuiItem {
         return ItemStacks.builder()
                 .stringReplacements(
                         Couple.of("{vaultName}", customName),
-                        Couple.of("{id}", id)
+                        Couple.of("{id}", this.key.id())
                 )
                 .displayName(cfg.yourVaultsGui().vaultItem().name())
                 .material(icon)
                 .lore(cfg.yourVaultsGui().vaultItem().lore())
                 .build();
-    }
-
-    public CompletableFuture<Vault> lazyVault() {
-        if (this.lazyVault == null) {
-            return toVault().thenApply(vault -> {
-                this.lazyVault = vault;
-                return vault;
-            });
-        }
-        return CompletableFuture.completedFuture(lazyVault);
-    }
-
-    public void lazyVaultWithEconomy(Player player, Consumer<Vault> consumer) {
-        toVaultWithEconomy(player, consumer);
     }
 
     @Override
@@ -125,7 +103,7 @@ public class SnapshotVault extends AbstractGuiItem {
         final boolean isLeftClick = event.isLeftClick();
         Player player = (Player) event.getWhoClicked();
 
-        lazyVaultWithEconomy(player, vault -> {
+        toVaultWithEconomy(player, vault -> {
             if (isLeftClick) {
                 vault.open(player);
             } else {
@@ -134,5 +112,13 @@ public class SnapshotVault extends AbstractGuiItem {
                 editVaultGui.open(player);
             }
         });
+    }
+
+    public UUID getOwner() {
+        return this.key.owner();
+    }
+
+    public int getId() {
+        return this.key.id();
     }
 }

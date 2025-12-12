@@ -8,6 +8,7 @@ import dev.jsinco.malts.gui.MaltsGui;
 import dev.jsinco.malts.gui.VaultOtherGui;
 import dev.jsinco.malts.gui.YourVaultsGui;
 import dev.jsinco.malts.obj.MaltsPlayer;
+import dev.jsinco.malts.obj.VaultKey;
 import dev.jsinco.malts.storage.DataSource;
 import dev.jsinco.malts.obj.Vault;
 import org.bukkit.Bukkit;
@@ -29,8 +30,17 @@ public class VaultListener implements Listener {
             return;
         }
         vault.update((Player) event.getPlayer());
+        VaultKey key = vault.getKey();
+
         DataSource dataSource = DataSource.getInstance();
-        dataSource.saveVault(vault);
+
+        // Starting save, lock the vault to prevent opening while we save
+        dataSource.lock(key);
+
+        dataSource.saveVault(vault).thenRun(() -> {
+            // Finished saving, we can release
+            dataSource.releaseLock(key);
+        });
     }
 
     @EventHandler

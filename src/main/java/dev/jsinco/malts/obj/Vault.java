@@ -11,6 +11,7 @@ import dev.jsinco.malts.api.events.vault.VaultTrustPlayerEvent;
 import dev.jsinco.malts.configuration.ConfigManager;
 import dev.jsinco.malts.configuration.files.Config;
 import dev.jsinco.malts.configuration.files.Lang;
+import dev.jsinco.malts.storage.DataSource;
 import dev.jsinco.malts.utility.Couple;
 import dev.jsinco.malts.utility.Executors;
 import dev.jsinco.malts.utility.Text;
@@ -28,9 +29,12 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Represents a transient vault inventory in Malts.
@@ -48,9 +52,8 @@ public class Vault implements MaltsInventory {
     private static final Gson GSON = Util.GSON;
     private static final Config cfg = ConfigManager.get(Config.class);
 
-
-    private final UUID owner;
-    private final int id;
+    @Getter
+    private final VaultKey key;
     private final Inventory inventory;
     @NotNull
     private String customName;
@@ -60,8 +63,7 @@ public class Vault implements MaltsInventory {
 
     public Vault(UUID owner, int id) {
         Preconditions.checkArgument(id > 0, "Vault ID must be greater than 0");
-        this.owner = owner;
-        this.id = id;
+        this.key = VaultKey.of(owner, id);
         this.customName = cfg.vaults().defaultName().replace("{id}", String.valueOf(id));
         this.icon = cfg.vaults().defaultIcon();
         this.trustedPlayers = new ArrayList<>();
@@ -73,8 +75,7 @@ public class Vault implements MaltsInventory {
 
     public Vault(UUID owner, int id, ItemStack[] items) {
         Preconditions.checkArgument(id > 0, "Vault ID must be greater than 0");
-        this.owner = owner;
-        this.id = id;
+        this.key = VaultKey.of(owner, id);
         this.customName = cfg.vaults().defaultName().replace("{id}", String.valueOf(id));
         this.icon = cfg.vaults().defaultIcon();
         this.trustedPlayers = new ArrayList<>();
@@ -89,8 +90,7 @@ public class Vault implements MaltsInventory {
     }
 
     public Vault(UUID owner, int id, String encodedInventory, String customName, Material icon, String trustedPlayers) {
-        this.owner = owner;
-        this.id = id;
+        this.key = VaultKey.of(owner, id);
         this.customName = customName != null && !customName.isEmpty() ? customName : "Vault #" + id;
         this.icon = icon != null && icon.isItem() ? icon : cfg.vaults().defaultIcon();
 
@@ -127,43 +127,72 @@ public class Vault implements MaltsInventory {
      */
     public void open(Player player) {
         Executors.runSync(() -> {
-            Couple<VaultOpenState, Player> couple = this.getOpenState();
-            VaultOpenEvent event = new VaultOpenEvent(this, player, couple, !Bukkit.isPrimaryThread());
-            event.setCancelled(couple.a() == VaultOpenState.OPEN);
+            List<Player> viewers = this.getViewers();
+            //VaultOpenEvent event = new VaultOpenEvent(this, player, viewers, !Bukkit.isPrimaryThread());
+            //event.setCancelled();
+            Text.debug("Player " + player.getName() + " is attempting to open vault " + this.key.id() + ". Can open: " + this.canOpen(player, viewers));
 
-            if (!event.callEvent()) {
+            if (!this.canOpen(player, viewers)) {
                 ConfigManager.get(Lang.class).entry(l -> l.vaults().alreadyOpen(), player);
                 return;
             }
 
-            Couple<VaultOpenState, Player> updatedCouple = event.getOpenState();
-            VaultOpenState state = updatedCouple.a();
-            Player otherPlayer = updatedCouple.b();
-
             player.openInventory(this.inventory);
 
-            if (state == VaultOpenState.BYPASSED && otherPlayer.getOpenInventory().getTopInventory().getHolder(false) instanceof Vault otherVault) {
-                otherVault.update(otherPlayer);
+
+
+            if (viewers.isEmpty()) {
+                return;
+            }
+
+            Player otherPlayer = viewers.getFirst();
+            if (otherPlayer.getOpenInventory().getTopInventory().getHolder(false) instanceof Vault otherVault) {
+                otherVault.update(otherPlayer); // Update this vault
             }
         });
     }
 
-    /**
-     * Gets the open state of this vault.
-     * 
-     * @return a couple containing the open state and the player who has it open, if any
-     * @see #update(Player) 
-     */
-    public Couple<@NotNull VaultOpenState, @Nullable Player> getOpenState() {
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            if (this.equals(player.getOpenInventory().getTopInventory().getHolder(false))) {
-                if (player.hasPermission(BYPASS_OPEN_VAULT_PERM)) {
-                    return Couple.of(VaultOpenState.BYPASSED, player);
-                }
-                return Couple.of(VaultOpenState.OPEN, player);
+
+    public boolean canOpen(Player player, List<Player> viewers) {
+        // A vault can be opened by a player if:
+        // - No other players are viewing it
+        // - The player has the bypass permission
+        // - The only other viewers are players with the bypass permission
+        // A vault may never be opened if it is locked.
+        DataSource dataSource = DataSource.getInstance();
+        if (dataSource.isLocked(this.key)) {
+            Text.debug("Vault " + this.key.id() + " is locked, player " + player.getName() + " cannot open it.");
+            return false;
+        }
+
+        if (viewers.isEmpty()) {
+            Text.debug("Vault " + this.key.id() + " has no viewers, player " + player.getName() + " can open it.");
+            return true;
+        }
+
+        if (player.hasPermission(BYPASS_OPEN_VAULT_PERM)) {
+            Text.debug("Player " + player.getName() + " has bypass permission, can open vault " + this.key.id() + " despite viewers.");
+            return true;
+        }
+
+        for (Player viewer : viewers) {
+            // If any viewer does not have bypass permission or is the owner, deny access
+            if (!viewer.hasPermission(BYPASS_OPEN_VAULT_PERM) || viewer.getUniqueId().equals(this.key.owner())) {
+                return false;
             }
         }
-        return Couple.of(VaultOpenState.CLOSED, null);
+        Text.debug("All viewers of vault " + this.key.id() + " have bypass permission, player " + player.getName() + " can open it.");
+        return true;
+    }
+
+    public List<Player> getViewers() {
+        List<Player> viewers = new ArrayList<>();
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (this.equals(player.getOpenInventory().getTopInventory().getHolder(false))) {
+                viewers.add(player);
+            }
+        }
+        return viewers;
     }
 
     /**
@@ -183,18 +212,19 @@ public class Vault implements MaltsInventory {
                 Inventory inv = player.getOpenInventory().getTopInventory();
                 if (this.equals(inv.getHolder(false))) {
                     inv.setContents(this.inventory.getContents());
-                    Text.debug("Updated inventory for player " + player.getName() + " with vault " + this.id);
+                    Text.debug("Updated inventory for player " + player.getName() + " with vault " + this.key.id());
                 }
             }
         });
     }
 
+
     public boolean canAccess(Player player) {
-        return player.getUniqueId() == this.owner || this.trustedPlayers.contains(player.getUniqueId()) || player.hasPermission(BYPASS_OPEN_VAULT_PERM);
+        return player.getUniqueId() == this.key.owner() || this.trustedPlayers.contains(player.getUniqueId()) || player.hasPermission(BYPASS_OPEN_VAULT_PERM);
     }
 
     public boolean isTrusted(UUID uuid) {
-        return trustedPlayers.contains(uuid) || uuid == owner;
+        return trustedPlayers.contains(uuid) || uuid == this.key.owner();
     }
 
     /**
@@ -267,12 +297,20 @@ public class Vault implements MaltsInventory {
      * @return a copy of this vault
      */
     public Vault copy(UUID newOwner) {
-        Vault copy = new Vault(newOwner, this.id);
+        Vault copy = new Vault(newOwner, this.key.id());
         copy.setCustomName(this.customName);
         copy.setIcon(this.icon);
         copy.setTrustedPlayers(new ArrayList<>(this.trustedPlayers));
         copy.getInventory().setContents(this.getInventory().getContents());
         return copy;
+    }
+
+    public UUID getOwner() {
+        return key.owner();
+    }
+
+    public int getId() {
+        return key.id();
     }
 
     private static ItemStack[] decodeInventory(String encodedInventory) {
@@ -284,12 +322,12 @@ public class Vault implements MaltsInventory {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Vault vault = (Vault) o;
-        return id == vault.id && Objects.equals(owner, vault.owner);
+        return Objects.equals(this.key, vault.key);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(owner, id);
+        return this.key.hashCode();
     }
 
     public enum VaultOpenState {

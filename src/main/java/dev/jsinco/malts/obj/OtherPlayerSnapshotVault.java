@@ -38,7 +38,7 @@ public class OtherPlayerSnapshotVault extends SnapshotVault {
         }
         Player player = (Player) event.getWhoClicked();
         if (event.isLeftClick()) {
-            lazyVault().thenAccept(vault -> vault.open(player));
+            toVault().thenAccept(vault -> vault.open(player));
         }
     }
 }
