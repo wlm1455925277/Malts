@@ -146,7 +146,6 @@ public enum WarehouseMode {
         // Do nothing
     }));
 
-    private static final Config CONFIG = ConfigManager.get(Config.class);
 
     private final List<Class<? extends  Event>> eventClasses;
     private final Handler<? extends Event> handler;
@@ -171,7 +170,9 @@ public enum WarehouseMode {
 
     @SuppressWarnings("unchecked") // We suppress here since we trust enum construction to match event types
     public <T extends Event> void handle(T event, MaltsPlayer maltsPlayer, Player player) {
-        if (this == NONE || CONFIG.warehouse().disableModesInWorlds().contains(player.getWorld().getName()) || !this.eventClasses.contains(event.getClass())) {
+        List<String> disabledWorlds = ConfigManager.get(Config.class).warehouse().disableModesInWorlds();
+
+        if (this == NONE || disabledWorlds.contains(player.getWorld().getName()) || !this.eventClasses.contains(event.getClass())) {
             return;
         } else if (!player.hasPermission(this.getPermission())) {
             WarehouseMode newMode = getNextMode(this, player);

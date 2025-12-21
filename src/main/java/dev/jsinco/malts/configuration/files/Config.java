@@ -154,7 +154,7 @@ public class Config extends OkaeriFile {
     private Warehouse warehouse = new Warehouse();
     @Getter
     @Accessors(fluent = true)
-    public static class Warehouse extends Vaults {
+    public static class Warehouse extends OkaeriConfig {
 
         @Comment({
                 "Automatically blacklist items that have a stack <= 1."
