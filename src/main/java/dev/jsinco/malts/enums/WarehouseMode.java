@@ -1,5 +1,6 @@
 package dev.jsinco.malts.enums;
 
+import com.google.common.base.Preconditions;
 import dev.jsinco.malts.configuration.ConfigManager;
 import dev.jsinco.malts.configuration.files.Config;
 import dev.jsinco.malts.configuration.files.Lang;
@@ -183,9 +184,8 @@ public enum WarehouseMode {
         DataSource dataSource = DataSource.getInstance();
         Warehouse warehouse = dataSource.cachedObject(maltsPlayer.getUuid(), Warehouse.class);
 
-        if (warehouse == null) {
-            throw new IllegalStateException("Warehouse is not cached.");
-        }
+        Preconditions.checkNotNull(warehouse, "Warehouse is not cached.");
+
         ((Handler<T>) handler).handle(event, maltsPlayer, warehouse);
     }
 

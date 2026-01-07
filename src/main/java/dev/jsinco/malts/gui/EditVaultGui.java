@@ -1,7 +1,7 @@
 package dev.jsinco.malts.gui;
 
+import com.google.common.base.Preconditions;
 import dev.jsinco.malts.configuration.ConfigManager;
-import dev.jsinco.malts.configuration.files.Config;
 import dev.jsinco.malts.configuration.files.GuiConfig;
 import dev.jsinco.malts.configuration.files.Lang;
 import dev.jsinco.malts.events.ChatPromptInputListener.ChatInputCallback;
@@ -28,6 +28,7 @@ import org.bukkit.inventory.ItemStack;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 public class EditVaultGui extends MaltsGui {
 
@@ -130,7 +131,7 @@ public class EditVaultGui extends MaltsGui {
                             Couple.of("{vaultName}", vault.getCustomName()),
                             Couple.of("{id}", String.valueOf(vault.getId())),
                             Couple.of("{name}", p.getName()),
-                            Couple.of("{trustedListSize}", trustListCap())
+                            Couple.of("{trustedListSize}", trustListCap(vault.getOwner()))
                             //Couple.of("{trustedList}", trustedListString()),
                     )
                     .displayName(cfg.editVaultGui().editTrustListButton().name())
@@ -165,17 +166,17 @@ public class EditVaultGui extends MaltsGui {
                             } else if (vault.addTrusted(offlinePlayer.getUniqueId())){
                                 lng.entry(l -> l.vaults().playerTrusted(), player, Couple.of("{name}", input));
                             } else {
-                                lng.entry(l -> l.vaults().trustListMaxed(), player, Couple.of("{trustedListSize}", trustListCap()));
+                                lng.entry(l -> l.vaults().trustListMaxed(), player, Couple.of("{trustedListSize}", trustListCap(vault.getOwner())));
                             }
 
                             DataSource.getInstance().saveVault(vault);
 
                             Util.editMeta(clickedItem, meta -> {
-                                meta.displayName(Text.mmNoItalic(cfg.editVaultGui().editTrustListButton().name().replace("{trustedListSize}", trustListCap()), NamedTextColor.AQUA));
+                                meta.displayName(Text.mmNoItalic(cfg.editVaultGui().editTrustListButton().name().replace("{trustedListSize}", trustListCap(vault.getOwner())), NamedTextColor.AQUA));
                                 meta.lore(Text.mmlNoItalic(
                                         Util.replaceAll(
                                                 Util.replaceStringWithList(cfg.editVaultGui().editTrustListButton().lore(), "{trustedList}", trustedListString()),
-                                                "{trustedListSize}", trustListCap()
+                                                "{trustedListSize}", trustListCap(vault.getOwner())
                                         ),
                                         NamedTextColor.WHITE
                                 ));
@@ -216,8 +217,10 @@ public class EditVaultGui extends MaltsGui {
         player.openInventory(this.getInventory());
     }
 
-    private String trustListCap() {
-        int max = ConfigManager.get(Config.class).vaults().trustCap();
+    private String trustListCap(UUID ownerUUID) {
+        MaltsPlayer ownerMaltsPlayer = DataSource.getInstance().cachedObject(vault.getOwner(), MaltsPlayer.class);
+        Preconditions.checkNotNull(ownerMaltsPlayer, "MaltsPlayer should not be null for vault owner.");
+        int max = ownerMaltsPlayer.getTrustCapacity();
         return vault.getTrustedPlayers().size() + "/" + max;
     }
 
