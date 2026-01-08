@@ -13,6 +13,7 @@ import dev.jsinco.malts.utility.Couple;
 import dev.jsinco.malts.utility.Executors;
 import dev.jsinco.malts.utility.Util;
 import io.papermc.paper.block.TileStateInventoryHolder;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Item;
@@ -22,6 +23,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerAttemptPickupItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -115,22 +117,32 @@ public enum WarehouseMode {
 
     // Automatically refills the player's inventory from warehouse stock when items run low. (Consuming or building.)
     AUTO_REPLENISH(List.of(BlockPlaceEvent.class, PlayerItemConsumeEvent.class), (event, maltsPlayer, warehouse) -> {
-        ItemStack itemInHand;
         Player player;
+        ItemStack originalItemStack;
+        EquipmentSlot hand;
 
+        // These two events don't have a common parent
         if (event instanceof BlockPlaceEvent e) {
-            itemInHand = e.getItemInHand();
             player = e.getPlayer();
+            originalItemStack = e.getItemInHand();
+            hand = e.getHand();
         } else if (event instanceof PlayerItemConsumeEvent e) {
-            itemInHand = e.getItem();
             player = e.getPlayer();
+            originalItemStack = e.getItem();
+            hand = e.getHand();
         } else {
             throw new IllegalStateException("Unexpected event type.");
         }
 
-        Material material = itemInHand.getType();
+        Material material = originalItemStack.getType();
 
-        if (itemInHand.getAmount() < 2 && warehouse.hasCompartment(material)) {
+        if (originalItemStack.getAmount() > 2 || !warehouse.hasCompartment(material) || player.getGameMode() == GameMode.CREATIVE) {
+            return;
+        }
+
+        Executors.delayedSync(1, () -> {
+            ItemStack itemInHand = player.getInventory().getItem(hand);
+
             ItemStack item = warehouse.destockItem(material, itemInHand.getMaxStackSize() - itemInHand.getAmount());
             if (item == null) {
                 return;
@@ -141,7 +153,7 @@ public enum WarehouseMode {
                     Couple.of("{amount}", item.getAmount()),
                     Couple.of("{stock}", warehouse.getQuantity(material))
             );
-        }
+        });
     }),
     NONE(List.of(), ((event, maltsPlayer, warehouse) -> {
         // Do nothing
