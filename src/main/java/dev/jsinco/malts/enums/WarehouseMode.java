@@ -187,7 +187,7 @@ public enum WarehouseMode {
 
         if (this == NONE || disabledWorlds.contains(player.getWorld().getName()) || !this.eventClasses.contains(event.getClass())) {
             return;
-        } else if (!player.hasPermission(this.getPermission())) {
+        } else if (!player.hasPermission(this.getPermission()) || !getEnabledModes().contains(this)) {
             WarehouseMode newMode = getNextMode(this, player);
             maltsPlayer.setWarehouseMode(newMode);
             return;
