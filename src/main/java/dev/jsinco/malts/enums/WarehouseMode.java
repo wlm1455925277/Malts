@@ -171,7 +171,7 @@ public enum WarehouseMode {
     public <T extends Event> void handle(T event, MaltsPlayer maltsPlayer, Player player) {
         if (this == NONE || !this.eventClasses.contains(event.getClass())) {
             return;
-        } else if (!player.hasPermission(this.getPermission())) {
+        } else if (!player.hasPermission(this.getPermission()) || !getEnabledModes().contains(this)) {
             WarehouseMode newMode = getNextMode(this, player);
             maltsPlayer.setWarehouseMode(newMode);
             return;
