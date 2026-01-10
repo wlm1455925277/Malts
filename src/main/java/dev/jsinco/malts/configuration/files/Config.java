@@ -154,7 +154,7 @@ public class Config extends OkaeriFile {
     private Warehouse warehouse = new Warehouse();
     @Getter
     @Accessors(fluent = true)
-    public static class Warehouse extends Vaults {
+    public static class Warehouse extends OkaeriConfig {
 
         @Comment({
                 "Automatically blacklist items that have a stack <= 1."
@@ -197,6 +197,12 @@ public class Config extends OkaeriFile {
                 WarehouseMode.AUTO_REPLENISH
         );
 
+        @Comment({
+                "Worlds where warehouse modes are disabled.",
+                "Players will not be able to use any warehouse modes",
+                "while in these worlds."
+        })
+        private List<String> disableModesInWorlds = List.of();
 
         @Comment({
                 "The default amount of warehouse stock players have.",
